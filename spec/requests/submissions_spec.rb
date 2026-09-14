@@ -56,6 +56,10 @@ RSpec.describe DiscourseSpamGuard::AdminController do
       post url, params: { token: token, confirmed: true }
       expect(response.status).to eq(202)
       expect(response.parsed_body.dig("submission", "status")).to eq("pending")
+      expect(response.parsed_body.dig("submission", "events").last).to include(
+        "actor_id" => admin.id,
+        "actor_username" => admin.username,
+      )
       expect(response.body).not_to include(SiteSetting.spam_guard_submission_api_key)
     end
   end

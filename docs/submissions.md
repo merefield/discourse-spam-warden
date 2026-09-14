@@ -58,12 +58,17 @@ A recovery job handles lost queued jobs and stale in-flight records every five
 minutes. The dashboard refresh button retrieves the latest status.
 
 Requests use HTTPS, form encoding, bounded timeouts and a bounded response size.
-Redirects are not followed. Only an explicit successful JSON response is recorded
-as submitted. Provider bodies and credentials are not copied into local errors.
+Redirects are not followed. HTTP 200 with an empty body (the documented legacy
+success response) or an explicit successful JSON response is recorded as submitted.
+Other HTTP statuses and unrecognised responses remain uncertain. Existing uncertain
+records are not automatically reclassified because their response bodies were not retained. Provider bodies and credentials are not copied into local errors.
 Automated tests mock the provider; they do not verify live credential acceptance
 or send real reports.
 
 ## Audit, retention and correction
+
+History displays each approving administrator’s current username with a link to their
+admin user page. Stored actor IDs remain unchanged; deleted accounts display their ID.
 
 The account retains one compact submission record: internal account, actor, post
 and review IDs, a payload hash, status, attempt count, timestamps and the last 20

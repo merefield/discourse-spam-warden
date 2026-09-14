@@ -174,10 +174,23 @@ export default class SpamGuardSubmission extends Component {
                       (concat "spam_guard.submission.status." event.status)
                     }}
                     ·
-                    {{i18n
-                      "spam_guard.submission.actor"
-                      id=event.actor_id
-                    }}</li>
+                    {{#if event.actor_username}}
+                      <a
+                        href={{getURL
+                          (concat
+                            "/admin/users/"
+                            event.actor_id
+                            "/"
+                            event.actor_username
+                          )
+                        }}
+                      >{{i18n
+                          "spam_guard.submission.actor_username"
+                          username=event.actor_username
+                        }}</a>
+                    {{else}}
+                      {{i18n "spam_guard.submission.actor" id=event.actor_id}}
+                    {{/if}}</li>
                 {{/each}}
               </ul>
             </details>

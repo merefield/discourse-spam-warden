@@ -71,6 +71,7 @@ en:
         queued: "Report queued for submission."
         history: "Submission history"
         actor: "Approved by admin ID %{id}"
+        actor_username: "Approved by @%{username}"
         attempts:
           one: "%{count} delivery attempt"
           other: "%{count} delivery attempts"

@@ -37,6 +37,8 @@ module DiscourseSpamGuard
         end
       end
       return "unknown", "http_error" unless code == "200"
+      # The documented legacy success response has HTTP 200 and no body.
+      return "submitted", nil if body.strip.empty?
       data = JSON.parse(body)
       return "submitted", nil if data.is_a?(Hash) && [1, true].include?(data["success"])
       if data.is_a?(Hash) && [0, false].include?(data["success"])

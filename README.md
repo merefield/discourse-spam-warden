@@ -83,7 +83,9 @@ remain separate. Username and AI evidence add no numeric points.
 
 The account dashboard places a succinct saved-score explanation above a compact
 calculation column and separate evidence cards. It stacks on smaller screens, with
-methodology expandable and actions below. Saved assessments keep their original
+methodology expandable and account actions directly below the Spam Guard header.
+At wide container sizes, the risk score and breakdown boxes align in one column.
+Saved assessments keep their original
 scores and weights; older records show a legacy breakdown. Recheck to apply version 8.
 
 See [external scoring and upgrade details](docs/external-scoring.md),
@@ -102,7 +104,9 @@ No additional LLM calls are made. See [AI integration](docs/ai-integration.md).
 ## Reporting confirmed spam
 
 Reporting has separate controls: enable `spam_guard_submissions_enabled` and configure
-the secret `spam_guard_submission_api_key`. Reporting, retained evidence and recovery
+the secret `spam_guard_submission_api_key`, available from
+[Stop Forum Spam’s API key registration page](https://www.stopforumspam.com/signup).
+Reporting, retained evidence and recovery
 remain accessible when lookups are disabled.
 
 Open a user's Spam Guard dashboard and choose **Preview report**. The confirmation
@@ -111,8 +115,11 @@ agree before submitting. Eligibility requires independently staff-confirmed spam
 public topic; suspicious registrations and high scores alone do not qualify.
 
 After approval, the dashboard shows **Queued**. Click **Refresh submission status** to
-retrieve the result without reloading the page. Success requires explicit acceptance
-from Stop Forum Spam. Uncertain deliveries are never blindly retried. Review and Protect
+retrieve the result without reloading the page. The plugin recognises both JSON success
+and the provider’s documented empty HTTP 200 success response. Submission history
+shows the approving admin’s current username linked to their admin page, with an ID
+fallback for deleted accounts. Uncertain deliveries are never blindly retried; existing
+uncertain records are not automatically reclassified after upgrading. Review and Protect
 modes do not automatically submit reports.
 
 See [reporting setup, safeguards, retention and recovery](docs/submissions.md).

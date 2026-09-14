@@ -14,6 +14,44 @@ module("Integration | Component | SpamGuardSubmission", function (hooks) {
     this.currentUser.set("admin", true);
   });
 
+  test("audit events link named approvers and retain deleted-account IDs", async function (assert) {
+    const submission = {
+      status: "submitted",
+      attempts: 1,
+      events: [
+        {
+          status: "approved",
+          at: "2026-09-09T12:00:00Z",
+          actor_id: 3093,
+          actor_username: "admin_name",
+        },
+        {
+          status: "submitted",
+          at: "2026-09-09T12:01:00Z",
+          actor_id: 3094,
+          actor_username: null,
+        },
+      ],
+    };
+    await render(
+      <template>
+        <SpamGuardSubmission
+          @userId={{42}}
+          @configured={{true}}
+          @submission={{submission}}
+        />
+      </template>
+    );
+    await click(".spam-guard-submission details summary");
+    assert
+      .dom(".spam-guard-submission details a")
+      .hasText("Approved by @admin_name")
+      .hasAttribute("href", "/admin/users/3093/admin_name");
+    assert
+      .dom(".spam-guard-submission details")
+      .includesText("Approved by admin ID 3094");
+  });
+
   test("preview requires explicit approval and sends only the signed token", async function (assert) {
     let submissions = 0;
     pretender.get(

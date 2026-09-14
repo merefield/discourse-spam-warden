@@ -34,7 +34,7 @@ Discourse Spam Guard helps staff decide which accounts need attention, explains 
 
 * Checks new registrations in the background, with an optional delayed recheck and manual checks for individual accounts.
 * Looks up email and public registration IP reputation on Stop Forum Spam, with optional username evidence.
-* Provides an expandable dashboard on each admin user page, with a succinct saved-score explanation, a separate calculation column and evidence cards for reputation, reading, posting and moderation history. The layout stacks on smaller screens, with actions below and methodology expandable.
+* Provides an expandable dashboard on each admin user page, with a succinct saved-score explanation, a separate calculation column and evidence cards for reputation, reading, posting and moderation history. The score and breakdown boxes align at wide container sizes, and the layout stacks on smaller screens. Account actions sit directly below the Spam Guard header; methodology is expandable.
 * Adds a compact **Spam Guard** score to the admin user list. Click it to open that account's dashboard. Unchecked accounts show grey **N/A**; exempt accounts have a blue, explicitly labelled override.
 * Uses configurable, explainable scoring. Email reports contribute 8 points each (cap 60), and IP reports 3 each (cap 30), with full weight when last reported within 7 days, half within 30 days, and zero for older or undated evidence. Reading adjusts suspicion once; confirmed spam adds 85 points per post separately, with a final cap of 100. These defaults are configurable except for the fixed recency windows.
 * Offers **Observe**, **Review** and **Protect** modes, plus persistent account exemptions.
@@ -82,13 +82,13 @@ additional model calls. See [integration details and scope](https://github.com/m
 
 ### Contributing confirmed spam
 
-Enable `spam_guard_submissions_enabled` and set the secret `spam_guard_submission_api_key`. Reporting is independent of the lookup enable switch and is available to human admins only.
+Get a key from [Stop Forum Spam’s API key registration page](https://www.stopforumspam.com/signup), then enable `spam_guard_submissions_enabled` and set the secret `spam_guard_submission_api_key`. Reporting is independent of the lookup enable switch and is available to human admins only.
 
 On an account's dashboard, choose **Preview report**. The confirmation dialog shows the destination, exact username, email, registration IP and evidence, including the post URL and excerpt. It discloses API-key authentication without exposing the secret. An agreement checkbox is required before submitting; Cancel sends nothing.
 
 A qualifying report requires a spam flag agreed with by human staff within the last 30 days on a retained post from a public topic. Staff and exempt accounts, unconfirmed registrations, private messages and restricted categories are excluded. A high score or existing Stop Forum Spam match alone cannot qualify an account for reporting.
 
-After approval, the dashboard shows **Queued**. Use **Refresh submission status** to check delivery. **Submitted successfully** means the provider explicitly accepted the report. Uncertain deliveries are blocked from resubmission to avoid duplicates; the dashboard explains recovery options.
+After approval, the dashboard shows **Queued**. Use **Refresh submission status** to check delivery. **Submitted successfully** means the provider returned JSON success or its documented empty HTTP 200 success response. History shows the approving admin’s current username linked to their admin page, with an ID fallback for deleted accounts. Uncertain deliveries are blocked from resubmission to avoid duplicates; the dashboard explains recovery options. Existing uncertain records are not automatically reclassified after upgrading.
 
 Reporting is always a separate, explicit action: choosing Review or Protect mode does not send reports. See [reporting safeguards and recovery](https://github.com/merefield/discourse-spam-guard/blob/main/docs/submissions.md).
 
