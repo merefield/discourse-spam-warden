@@ -9,8 +9,8 @@ export default {
     withPluginApi((api) => {
       api.modifyClass("controller:admin-user/index", {
         pluginId: "discourse-spam-warden-open-dashboard",
-        queryParams: ["spamGuard"],
-        spamGuard: false,
+        queryParams: ["spamWarden"],
+        spamWarden: false,
       });
       api.modifyClass(
         "controller:admin-users-list/show",
