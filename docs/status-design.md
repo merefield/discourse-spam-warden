@@ -23,7 +23,7 @@ The evidence panel also shows the original external reputation badge alongside
 the reading adjustment. Strong external evidence remains visible when reading
 changes an automatic-silence recommendation to human review.
 
-The account dashboard and admin user list share `SpamGuardRiskScore`: a large
+The account dashboard and admin user list share `SpamWardenRiskScore`: a large
 percentage summary and a compact list version. Percentages express the existing
 0–100 rules index, not a statistically calibrated probability. The numeric bands
 below set the colour in both contexts unless an account is currently exempt.
@@ -40,8 +40,8 @@ unchecked account. The full dashboard explains that this is a manual override
 and the score is historical. Removing the exemption restores the assessment
 colour. The underlying evidence and scan history are unchanged.
 
-The user list has a dedicated Spam Guard column. Its compact box is the link to
-`/admin/users/:id/:username?spamGuard=true#spam-guard`; the registered query parameter
+The user list has a dedicated Spam Warden column. Its compact box is the link to
+`/admin/users/:id/:username?spamWarden=true#spam-warden`; the registered query parameter
 opens the account dashboard, and the fragment identifies the scroll target.
 Discourse strips fragments before internal route transitions, so opening must
 observe the router's query parameters rather than depend on `window.location.hash`.
@@ -49,7 +49,7 @@ Compact unscored boxes use grey N/A, while actual scored
 zeroes remain 0%. The full dashboard spells out “Not scored”. The additional
 column is included in the admin table's grid count, and absent for moderators.
 
-A permanent grey Spam Guard heading contains a full-width native button with the
+A permanent grey Spam Warden heading contains a full-width native button with the
 title and expand/collapse chevron. The entire header toggles the dashboard; native
 button semantics support keyboard activation, with a visible focus outline and
 `aria-expanded` state. Collapsing retains loaded details. The

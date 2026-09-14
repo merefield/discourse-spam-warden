@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::LocalSignals do
+RSpec.describe DiscourseSpamWarden::LocalSignals do
   fab!(:user)
   fab!(:admin)
 
   before do
     freeze_time
-    SiteSetting.spam_guard_enabled = true
-    SiteSetting.spam_guard_local_signals = true
+    SiteSetting.spam_warden_enabled = true
+    SiteSetting.spam_warden_local_signals = true
     Jobs.run_later!
   end
 
@@ -139,8 +139,8 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
     end
 
     it "multiplies confirmed posts by the configured weight before assessment caps" do
-      SiteSetting.spam_guard_confirmed_spam_points = 70
-      SiteSetting.spam_guard_local_points_cap = 85
+      SiteSetting.spam_warden_confirmed_spam_points = 70
+      SiteSetting.spam_warden_local_points_cap = 85
       2.times do |index|
         review =
           Fabricate(
@@ -165,7 +165,7 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
     end
 
     it "samples enough confirmed posts when the per-post weight is reduced" do
-      SiteSetting.spam_guard_confirmed_spam_points = 20
+      SiteSetting.spam_warden_confirmed_spam_points = 20
       6.times do
         review =
           Fabricate(
@@ -219,7 +219,7 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
       own_review =
         Fabricate(
           :reviewable,
-          type: "ReviewableSpamGuard",
+          type: "ReviewableSpamWarden",
           target: user,
           target_created_by: user,
           status: :approved,
@@ -249,7 +249,7 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
     end
 
     it "can be disabled independently of external reputation checks" do
-      SiteSetting.spam_guard_local_signals = false
+      SiteSetting.spam_warden_local_signals = false
 
       expect(described_class.snapshot(user)).to eq("enabled" => false, "adjustment" => 0)
     end
@@ -259,7 +259,7 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
     it "checks public posting through the real post-created event" do
       topic = Fabricate(:topic)
       expect_enqueued_with(
-        job: :spam_guard_check,
+        job: :spam_warden_check,
         args: {
           user_id: user.id,
           source: "activity",
@@ -273,7 +273,7 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
       reviewable.add_score(user, ReviewableScore.types[:spam])
 
       expect_enqueued_with(
-        job: :spam_guard_check,
+        job: :spam_warden_check,
         args: {
           user_id: user.id,
           source: "activity",
@@ -283,7 +283,7 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
 
     it "schedules an eligible account check one minute later" do
       expect_enqueued_with(
-        job: :spam_guard_check,
+        job: :spam_warden_check,
         args: {
           user_id: user.id,
           source: "activity",
@@ -293,11 +293,11 @@ RSpec.describe DiscourseSpamGuard::LocalSignals do
     end
 
     it "skips exempt and established accounts and staff" do
-      DiscourseSpamGuard::Moderation.allow(user, admin)
+      DiscourseSpamWarden::Moderation.allow(user, admin)
       established = Fabricate(:user, created_at: 8.days.ago)
       trusted = Fabricate(:user, trust_level: 2)
 
-      expect_not_enqueued_with(job: :spam_guard_check) do
+      expect_not_enqueued_with(job: :spam_warden_check) do
         [user, admin, established, trusted].each { |account| described_class.enqueue(account) }
       end
     end

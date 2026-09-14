@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::AiIntegration do
+RSpec.describe DiscourseSpamWarden::AiIntegration do
   fab!(:admin)
   fab!(:user)
 
   describe ".snapshot" do
     it "returns no AI evidence when integration is disabled" do
-      SiteSetting.spam_guard_ai_integration = false
+      SiteSetting.spam_warden_ai_integration = false
       expect(described_class.snapshot(user, guardian: admin.guardian)).to be_nil
       expect(described_class.pending_review(user)).to be_nil
     end
@@ -32,9 +32,9 @@ RSpec.describe DiscourseSpamGuard::AiIntegration do
     before do
       SiteSetting.discourse_ai_enabled = true
       SiteSetting.ai_spam_detection_enabled = true
-      SiteSetting.spam_guard_enabled = true
-      SiteSetting.spam_guard_check_ip = false
-      SiteSetting.spam_guard_mode = "review"
+      SiteSetting.spam_warden_enabled = true
+      SiteSetting.spam_warden_check_ip = false
+      SiteSetting.spam_warden_mode = "review"
       user.email_tokens.update_all(confirmed: true)
       user.update!(registration_ip_address: "8.8.4.4")
       stub_request(:post, "https://api.stopforumspam.org/api").to_return(
@@ -61,17 +61,17 @@ RSpec.describe DiscourseSpamGuard::AiIntegration do
           "reviewable_id" => log.reviewable_id,
         )
         expect(entry.keys).not_to include("payload", "ai_api_audit_log_id")
-        expect(DiscourseSpamGuard::LocalSignals.snapshot(user)["history_points"]).to eq(0)
-        expect(DiscourseSpamGuard::SubmissionCandidate.latest(user)).to be_nil
+        expect(DiscourseSpamWarden::LocalSignals.snapshot(user)["history_points"]).to eq(0)
+        expect(DiscourseSpamWarden::SubmissionCandidate.latest(user)).to be_nil
 
         log.reviewable.perform(admin, :agree_and_keep)
 
         expect(
           described_class.snapshot(user, guardian: admin.guardian)["entries"].sole["outcome"],
         ).to eq("confirmed")
-        expect(DiscourseSpamGuard::LocalSignals.snapshot(user)["history_points"]).to eq(85)
-        expect(DiscourseSpamGuard::SubmissionCandidate.latest(user).post).to eq(post)
-        expect(DiscourseSpamGuard::Submission.count).to eq(0)
+        expect(DiscourseSpamWarden::LocalSignals.snapshot(user)["history_points"]).to eq(85)
+        expect(DiscourseSpamWarden::SubmissionCandidate.latest(user).post).to eq(post)
+        expect(DiscourseSpamWarden::Submission.count).to eq(0)
       end
 
       it "retains staff rejection when the latest classification has no review link" do
@@ -91,8 +91,8 @@ RSpec.describe DiscourseSpamGuard::AiIntegration do
           "reviewable_id" => log.reviewable_id,
         )
         expect(described_class.pending_review(user)).to be_nil
-        expect(DiscourseSpamGuard::LocalSignals.snapshot(user)["history_points"]).to eq(0)
-        expect(DiscourseSpamGuard::SubmissionCandidate.latest(user)).to be_nil
+        expect(DiscourseSpamWarden::LocalSignals.snapshot(user)["history_points"]).to eq(0)
+        expect(DiscourseSpamWarden::SubmissionCandidate.latest(user)).to be_nil
       end
 
       it "includes Uncategorized posts in findings and pending review reuse" do
@@ -183,23 +183,23 @@ RSpec.describe DiscourseSpamGuard::AiIntegration do
       it "reuses an AI review without changing its payload or owning its silence" do
         log = ai_log
         payload = log.reviewable.payload.deep_dup
-        scan = DiscourseSpamGuard::Checker.call(user, source: "registration")
+        scan = DiscourseSpamWarden::Checker.call(user, source: "registration")
 
         expect(scan.reviewable_id).to eq(log.reviewable_id)
-        expect(ReviewableSpamGuard.where(target: user)).to be_empty
+        expect(ReviewableSpamWarden.where(target: user)).to be_empty
         expect(log.reviewable.reload.payload).to eq(payload)
         expect(user.reload).to be_silenced
-        DiscourseSpamGuard::Moderation.allow(user, admin)
+        DiscourseSpamWarden::Moderation.allow(user, admin)
         expect(user.reload).to be_silenced
       end
 
       it "keeps normal reputation review behavior when integration is disabled" do
         log = ai_log
-        SiteSetting.spam_guard_ai_integration = false
-        scan = DiscourseSpamGuard::Checker.call(user, source: "manual")
-        Jobs::SpamGuardReconcileAi.new.execute(user_id: user.id)
+        SiteSetting.spam_warden_ai_integration = false
+        scan = DiscourseSpamWarden::Checker.call(user, source: "manual")
+        Jobs::SpamWardenReconcileAi.new.execute(user_id: user.id)
 
-        expect(scan.reload.reviewable).to be_a(ReviewableSpamGuard)
+        expect(scan.reload.reviewable).to be_a(ReviewableSpamWarden)
         expect(scan.reviewable).to be_pending
         expect(log.reviewable.reload).to be_pending
         expect(described_class.snapshot(user, guardian: admin.guardian)).to be_nil
@@ -209,29 +209,29 @@ RSpec.describe DiscourseSpamGuard::AiIntegration do
         log = ai_log
         log.reviewable.perform(admin, :disagree)
 
-        scan = DiscourseSpamGuard::Checker.call(user, source: "manual")
-        expect(scan.reviewable).to be_a(ReviewableSpamGuard)
+        scan = DiscourseSpamWarden::Checker.call(user, source: "manual")
+        expect(scan.reviewable).to be_a(ReviewableSpamWarden)
         expect(log.reviewable.reload).to be_rejected
       end
     end
 
     describe ".reconcile" do
       it "consolidates an earlier account review into the AI review without confirming spam" do
-        scan = DiscourseSpamGuard::Checker.call(user, source: "registration")
+        scan = DiscourseSpamWarden::Checker.call(user, source: "registration")
         duplicate = scan.reviewable
         log = ai_log
         expect(
-          Jobs::SpamGuardReconcileAi.jobs.any? { |job| job["args"].first["user_id"] == user.id },
+          Jobs::SpamWardenReconcileAi.jobs.any? { |job| job["args"].first["user_id"] == user.id },
         ).to eq(true)
 
-        2.times { Jobs::SpamGuardReconcileAi.new.execute(user_id: user.id) }
+        2.times { Jobs::SpamWardenReconcileAi.new.execute(user_id: user.id) }
 
         expect(scan.reload.reviewable_id).to eq(log.reviewable_id)
         expect(duplicate.reload).to be_ignored
         expect(duplicate.payload["ai_reviewable_id"]).to eq(log.reviewable_id)
         expect(log.reviewable.reload).to be_pending
-        expect(DiscourseSpamGuard::LocalSignals.snapshot(user)["history_points"]).to eq(0)
-        expect(DiscourseSpamGuard::SubmissionCandidate.latest(user)).to be_nil
+        expect(DiscourseSpamWarden::LocalSignals.snapshot(user)["history_points"]).to eq(0)
+        expect(DiscourseSpamWarden::SubmissionCandidate.latest(user)).to be_nil
         expect(user.reload).to be_silenced
       end
     end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::Engagement do
+RSpec.describe DiscourseSpamWarden::Engagement do
   describe ".snapshot" do
     fab!(:user)
 
@@ -72,10 +72,10 @@ RSpec.describe DiscourseSpamGuard::Engagement do
     end
 
     it "uses the configured adjustment for each reading level" do
-      SiteSetting.spam_guard_no_reading_adjustment = 7
-      SiteSetting.spam_guard_reading_limited_adjustment = -2
-      SiteSetting.spam_guard_reading_meaningful_adjustment = -8
-      SiteSetting.spam_guard_reading_sustained_adjustment = -12
+      SiteSetting.spam_warden_no_reading_adjustment = 7
+      SiteSetting.spam_warden_reading_limited_adjustment = -2
+      SiteSetting.spam_warden_reading_meaningful_adjustment = -8
+      SiteSetting.spam_warden_reading_sustained_adjustment = -12
       user.update!(created_at: 2.hours.ago)
       expect(described_class.snapshot(user, source: "manual")["adjustment"]).to eq(7)
       user.user_stat.update!(posts_read_count: 1)
@@ -89,7 +89,7 @@ RSpec.describe DiscourseSpamGuard::Engagement do
         days_visited: 2,
       )
       expect(described_class.snapshot(user, source: "manual")["adjustment"]).to eq(-12)
-      SiteSetting.spam_guard_reading_sustained_adjustment = 0
+      SiteSetting.spam_warden_reading_sustained_adjustment = 0
       expect(described_class.snapshot(user, source: "manual")["adjustment"]).to eq(0)
     end
   end

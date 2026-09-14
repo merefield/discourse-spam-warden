@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 module Jobs
+  # Keep jobs queued before the rename executable after an upgrade.
   class SpamGuardReconcileAi < ::Jobs::Base
     def execute(args)
-      DiscourseSpamGuard::AiIntegration.reconcile(User.find_by(id: args[:user_id]))
+      SpamWardenReconcileAi.new.execute(args)
     end
   end
 end

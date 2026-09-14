@@ -2,7 +2,7 @@
 
 All settings in the free plugin's `config/settings.yml` have runtime consumers.
 
-| Setting (all prefixed `spam_guard_`) | Implemented behavior |
+| Setting (all prefixed `spam_warden_`) | Implemented behavior |
 | --- | --- |
 | `enabled` | Gates scheduling, checking and enforcement; recovery remains available |
 | `mode` | Observe records, Review creates review cases, Protect also permits qualified external-evidence silencing |
@@ -32,7 +32,7 @@ local signals can still request review when their review threshold is met. The
 same applies during provider outages. Neither case invents an external result or
 permits automatic silencing.
 
-The Pro extension's `spam_guard_pro_enabled` setting belongs to a development
+The Pro extension's `spam_warden_pro_enabled` setting belongs to a development
 scaffold. No Pro workflows consume it yet; enabling it adds no functionality.
 
 ## Report-count scoring (policy version 8)

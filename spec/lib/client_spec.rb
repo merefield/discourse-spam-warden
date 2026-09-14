@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::Client do
+RSpec.describe DiscourseSpamWarden::Client do
   describe "#lookup" do
     let(:fields) { { "email" => "person@example.com", "ip" => "8.8.8.8" } }
     let(:response_body) do

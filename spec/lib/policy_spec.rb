@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::Policy do
+RSpec.describe DiscourseSpamWarden::Policy do
   describe ".assess" do
     it "retains review for confirmed spam even when its configured contribution is zero" do
-      SiteSetting.spam_guard_local_points_cap = 0
+      SiteSetting.spam_warden_local_points_cap = 0
       %w[checked unknown].each do |status|
         assessment =
           described_class.assess(
@@ -23,7 +23,7 @@ RSpec.describe DiscourseSpamGuard::Policy do
     end
 
     it "caps posting and extension evidence separately from confirmed spam" do
-      SiteSetting.spam_guard_local_points_cap = 25
+      SiteSetting.spam_warden_local_points_cap = 25
       assessment =
         described_class.assess(
           {},
@@ -223,8 +223,8 @@ RSpec.describe DiscourseSpamGuard::Policy do
     it "snapshots custom report weights and caps independently of current settings" do
       saved = described_class.settings
       before = assess({ "email" => match }, settings: saved)
-      SiteSetting.spam_guard_email_report_points = 9
-      SiteSetting.spam_guard_email_points_cap = 25
+      SiteSetting.spam_warden_email_report_points = 9
+      SiteSetting.spam_warden_email_points_cap = 25
       expect(assess({ "email" => match })["base_score"]).to eq(25)
       expect(assess({ "email" => match }, settings: saved)).to eq(before)
       expect(before.dig("external_scoring", "fields", "email")).to include(
@@ -237,20 +237,20 @@ RSpec.describe DiscourseSpamGuard::Policy do
     end
 
     it "keeps review and protection thresholds independent of display weights" do
-      SiteSetting.spam_guard_email_report_points = 100
-      SiteSetting.spam_guard_email_points_cap = 100
+      SiteSetting.spam_warden_email_report_points = 100
+      SiteSetting.spam_warden_email_points_cap = 100
       expect(assess({ "email" => match })).to include("score" => 100, "decision" => "watch")
       strong = match.merge("frequency" => 20, "confidence" => 99)
-      SiteSetting.spam_guard_preset = "balanced"
+      SiteSetting.spam_warden_preset = "balanced"
       expect(assess({ "email" => strong })).to include("score" => 100, "decision" => "silence")
       expect(assess({ "email" => strong }, reading: -15)["decision"]).to eq("review")
-      SiteSetting.spam_guard_email_report_points = 0
+      SiteSetting.spam_warden_email_report_points = 0
       expect(assess({ "email" => strong })).to include("score" => 0, "decision" => "silence")
       expect(assess({ "email" => match.merge("confidence" => 50) })["decision"]).to eq("review")
     end
 
     it "adds confirmed spam after flooring suspicion without discounting it for reading" do
-      SiteSetting.spam_guard_local_points_cap = 0
+      SiteSetting.spam_warden_local_points_cap = 0
       [1, 2].each do |count|
         result =
           assess(
@@ -378,7 +378,7 @@ RSpec.describe DiscourseSpamGuard::Policy do
     end
 
     it "accepts strong email evidence alone with the balanced preset" do
-      SiteSetting.spam_guard_preset = "balanced"
+      SiteSetting.spam_warden_preset = "balanced"
 
       expect(described_class.evaluate("email" => strong)).to eq("silence")
       expect(described_class.evaluate("ip" => strong)).to eq("review")

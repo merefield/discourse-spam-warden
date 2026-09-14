@@ -2,8 +2,8 @@
 
 The free plugin includes exact duplicate posts, posting bursts and confirmed spam
 moderation history. These are deterministic rules; no keywords, semantic analysis,
-domain analysis or LLM calls are involved. The `spam_guard_local_signals` setting
-enables them by default when Spam Guard itself is enabled. Observe mode remains
+domain analysis or LLM calls are involved. The `spam_warden_local_signals` setting
+enables them by default when Spam Warden itself is enabled. Observe mode remains
 the default for the plugin and is recommended while evaluating the rules.
 
 | Signal | Evidence window and threshold | Contribution |
@@ -37,7 +37,7 @@ Only counts and contributions are stored, alongside the existing reading snapsho
 History uses agreed spam scores on approved `ReviewableFlaggedPost` records, with
 a positive-ID reviewer who is currently an admin or moderator. Multiple flags on
 one post count once. Pending, disagreed, ignored, non-spam and automated decisions
-are excluded, as are Spam Guard's own reviewables. The history sample is bounded by `max(3, ceil(100 / per-post points))`; a zero
+are excluded, as are Spam Warden's own reviewables. The history sample is bounded by `max(3, ceil(100 / per-post points))`; a zero
 weight samples three. Two confirmed posts at the default weight reach the final cap. Reversed
 agreements stop contributing at the next check. Deletion or silence without a
 confirmed spam flag is not evidence. No new history table or migration is needed.

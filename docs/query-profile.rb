@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe "Spam Guard populated query profile" do
+RSpec.describe "Spam Warden populated query profile" do
   it "profiles synthetic data inside the test transaction" do
-    SiteSetting.spam_guard_local_signals = true
+    SiteSetting.spam_warden_local_signals = true
     users = Fabricate.times(10, :user)
     admin = Fabricate(:admin)
     topics = users.map { |user| Fabricate(:topic, user: user) }
@@ -13,7 +13,7 @@ RSpec.describe "Spam Guard populated query profile" do
         FROM generate_series(1, 1000) AS sequence
       SQL
     DB.exec(<<~SQL, ids: users.map(&:id))
-      INSERT INTO spam_guard_scans (user_id, source, status, decision, action_taken, evidence, policy, created_at, updated_at)
+      INSERT INTO spam_warden_scans (user_id, source, status, decision, action_taken, evidence, policy, created_at, updated_at)
       SELECT account_id, 'activity', 'checked', 'allow', 'none', '{}', '{}',
              now() - sequence * interval '1 minute', now()
       FROM unnest(ARRAY[:ids]) AS account_id CROSS JOIN generate_series(1, 10000) AS sequence
@@ -29,9 +29,15 @@ RSpec.describe "Spam Guard populated query profile" do
       FROM reviewables CROSS JOIN generate_series(1, 10) AS sequence
       WHERE target_created_by_id IN (:ids)
     SQL
-    %w[posts topics categories users reviewables reviewable_scores spam_guard_scans].each do |table|
-      DB.exec("ANALYZE #{table}")
-    end
+    %w[
+      posts
+      topics
+      categories
+      users
+      reviewables
+      reviewable_scores
+      spam_warden_scans
+    ].each { |table| DB.exec("ANALYZE #{table}") }
     connection = ActiveRecord::Base.connection
     report =
       lambda do |name, sql, binds = []|
@@ -43,7 +49,7 @@ RSpec.describe "Spam Guard populated query profile" do
         puts "\n#{name}\n#{plan.join("\n")}"
       end
     old_list =
-      DiscourseSpamGuard::Scan
+      DiscourseSpamWarden::Scan
         .where(user_id: users.map(&:id))
         .select("DISTINCT ON (user_id) user_id, status, decision, created_at, policy")
         .order(:user_id, created_at: :desc, id: :desc)
@@ -56,8 +62,8 @@ RSpec.describe "Spam Guard populated query profile" do
         end
       end
     ActiveSupport::Notifications.subscribed(subscriber, "sql.active_record") do
-      expect(DiscourseSpamGuard::Scan.latest_for_users(users.map(&:id)).size).to eq(10)
-      DiscourseSpamGuard::LocalSignals.snapshot(users.first)
+      expect(DiscourseSpamWarden::Scan.latest_for_users(users.map(&:id)).size).to eq(10)
+      DiscourseSpamWarden::LocalSignals.snapshot(users.first)
     end
     captured.each_with_index do |(sql, binds), index|
       report.call("NEW QUERY #{index + 1}", sql, binds)

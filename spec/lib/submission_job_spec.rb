@@ -1,33 +1,33 @@
 # frozen_string_literal: true
 
-RSpec.describe Jobs::SpamGuardSubmit do
+RSpec.describe Jobs::SpamWardenSubmit do
   fab!(:user)
   fab!(:admin)
-  fab!(:post) { Fabricate(:spam_guard_confirmed_post, user: user) }
+  fab!(:post) { Fabricate(:spam_warden_confirmed_post, user: user) }
   let(:report) do
-    DiscourseSpamGuard::Submission.reserve(
-      DiscourseSpamGuard::SubmissionCandidate.latest(user),
+    DiscourseSpamWarden::Submission.reserve(
+      DiscourseSpamWarden::SubmissionCandidate.latest(user),
       admin,
     )
   end
 
   before do
     freeze_time
-    SiteSetting.spam_guard_submissions_enabled = true
-    SiteSetting.spam_guard_submission_api_key = "test-submission-key"
+    SiteSetting.spam_warden_submissions_enabled = true
+    SiteSetting.spam_warden_submission_api_key = "test-submission-key"
     Jobs.run_later!
   end
 
   describe "#execute" do
     it "sends once despite repeated approval and duplicate jobs" do
       request =
-        stub_request(:post, DiscourseSpamGuard::SubmissionClient::ENDPOINT).to_return(
+        stub_request(:post, DiscourseSpamWarden::SubmissionClient::ENDPOINT).to_return(
           body: '{"success":true}',
         )
       described_class.new.execute(submission_id: report.id)
       repeated =
-        DiscourseSpamGuard::Submission.reserve(
-          DiscourseSpamGuard::SubmissionCandidate.latest(user),
+        DiscourseSpamWarden::Submission.reserve(
+          DiscourseSpamWarden::SubmissionCandidate.latest(user),
           admin,
         )
       expect(repeated.id).to eq(report.id)
@@ -38,10 +38,10 @@ RSpec.describe Jobs::SpamGuardSubmit do
 
     it "limits preconnection retries to three attempts" do
       request =
-        stub_request(:post, DiscourseSpamGuard::SubmissionClient::ENDPOINT).to_raise(
+        stub_request(:post, DiscourseSpamWarden::SubmissionClient::ENDPOINT).to_raise(
           Net::OpenTimeout,
         )
-      expect_enqueued_with(job: :spam_guard_submit) do
+      expect_enqueued_with(job: :spam_warden_submit) do
         described_class.new.execute(submission_id: report.id)
       end
       2.times do
@@ -59,11 +59,11 @@ RSpec.describe Jobs::SpamGuardSubmit do
 
     it "leaves uncertain deliveries blocked without retrying" do
       request =
-        stub_request(:post, DiscourseSpamGuard::SubmissionClient::ENDPOINT).to_raise(
+        stub_request(:post, DiscourseSpamWarden::SubmissionClient::ENDPOINT).to_raise(
           Net::ReadTimeout,
         )
       report
-      expect_not_enqueued_with(job: :spam_guard_submit) do
+      expect_not_enqueued_with(job: :spam_warden_submit) do
         described_class.new.execute(submission_id: report.id)
       end
       described_class.new.execute(submission_id: report.id)
@@ -73,7 +73,7 @@ RSpec.describe Jobs::SpamGuardSubmit do
 
     it "cancels when staff exempt an account before dispatch" do
       report
-      DiscourseSpamGuard::Moderation.allow(user, admin)
+      DiscourseSpamWarden::Moderation.allow(user, admin)
       described_class.new.execute(submission_id: report.id)
       expect(report.reload).to have_attributes(
         status: "cancelled",
@@ -88,8 +88,8 @@ RSpec.describe Jobs::SpamGuardSubmit do
       described_class.new.execute(submission_id: report.id)
       expect(report.reload.status).to eq("cancelled")
       new_report =
-        DiscourseSpamGuard::Submission.reserve(
-          DiscourseSpamGuard::SubmissionCandidate.latest(user),
+        DiscourseSpamWarden::Submission.reserve(
+          DiscourseSpamWarden::SubmissionCandidate.latest(user),
           admin,
         )
       admin.update!(admin: false)
@@ -107,8 +107,8 @@ RSpec.describe Jobs::SpamGuardSubmit do
     it "recovers abandoned delivery as uncertain without replaying it" do
       report.finish!("sending")
       freeze_time 2.minutes.from_now
-      expect_not_enqueued_with(job: :spam_guard_submit) do
-        Jobs::SpamGuardSubmissionRecovery.new.execute({})
+      expect_not_enqueued_with(job: :spam_warden_submit) do
+        Jobs::SpamWardenSubmissionRecovery.new.execute({})
       end
       expect(report.reload).to have_attributes(status: "unknown", error_code: "delivery_uncertain")
     end

@@ -8,11 +8,11 @@ an automatic silence or remove an evidence-based requirement for review.
 
 | Contribution | Default | Setting |
 | --- | --- | --- |
-| Email report | 8 points | `spam_guard_email_report_points` |
-| Email cap, before recency | 60 points | `spam_guard_email_points_cap` |
-| Registration IP report | 3 points | `spam_guard_ip_report_points` |
-| IP cap, before recency | 30 points | `spam_guard_ip_points_cap` |
-| Staff-confirmed spam | 85 per distinct post | `spam_guard_confirmed_spam_points` |
+| Email report | 8 points | `spam_warden_email_report_points` |
+| Email cap, before recency | 60 points | `spam_warden_email_points_cap` |
+| Registration IP report | 3 points | `spam_warden_ip_report_points` |
+| IP cap, before recency | 30 points | `spam_warden_ip_points_cap` |
+| Staff-confirmed spam | 85 per distinct post | `spam_warden_confirmed_spam_points` |
 
 All five settings accept 0–100. The existing reading settings remain configurable.
 
@@ -41,7 +41,7 @@ final score = min(100, suspicion + confirmed spam points)
 ```
 
 Duplicates and posting bursts retain their shared 25-point cap. Extension points
-retain their own 25-point cap. `spam_guard_local_points_cap` now caps posting and
+retain their own 25-point cap. `spam_warden_local_points_cap` now caps posting and
 extension contributions together before reading; it no longer caps or discounts
 confirmed spam. Confirmed posts are added after the zero floor, so reassuring
 reading cannot cancel a confirmed incident. Failed/skipped provider checks remain

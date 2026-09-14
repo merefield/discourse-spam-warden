@@ -9,7 +9,7 @@ Enjoying this plugin? Please :star: it on [GitHub](https://github.com/merefield/
 
 ### Why use it?
 
-Spam Guard brings external reputation and activity on your own forum together in
+Spam Warden brings external reputation and activity on your own forum together in
 one place, so staff can see why an account needs attention and decide what to do.
 
 - **Understand the evidence.** Inspect the reports, their recency, reading activity
@@ -30,12 +30,12 @@ between suspicion, confirmed spam and an action taken explicit.
 
 ### Features
 
-Discourse Spam Guard helps staff decide which accounts need attention, explains the evidence, and works with Discourse's existing review queue and moderation controls.
+Discourse Spam Warden helps staff decide which accounts need attention, explains the evidence, and works with Discourse's existing review queue and moderation controls.
 
 * Checks new registrations in the background, with an optional delayed recheck and manual checks for individual accounts.
 * Looks up email and public registration IP reputation on Stop Forum Spam, with optional username evidence.
-* Provides an expandable dashboard on each admin user page, with a succinct saved-score explanation, a separate calculation column and evidence cards for reputation, reading, posting and moderation history. The score and breakdown boxes align at wide container sizes, and the layout stacks on smaller screens. Account actions sit directly below the Spam Guard header; methodology is expandable.
-* Adds a compact **Spam Guard** score to the admin user list. Click it to open that account's dashboard. Unchecked accounts show grey **N/A**; exempt accounts have a blue, explicitly labelled override.
+* Provides an expandable dashboard on each admin user page, with a succinct saved-score explanation, a separate calculation column and evidence cards for reputation, reading, posting and moderation history. The score and breakdown boxes align at wide container sizes, and the layout stacks on smaller screens. Account actions sit directly below the Spam Warden header; methodology is expandable.
+* Adds a compact **Spam Warden** score to the admin user list. Click it to open that account's dashboard. Unchecked accounts show grey **N/A**; exempt accounts have a blue, explicitly labelled override.
 * Uses configurable, explainable scoring. Email reports contribute 8 points each (cap 60), and IP reports 3 each (cap 30), with full weight when last reported within 7 days, half within 30 days, and zero for older or undated evidence. Reading adjusts suspicion once; confirmed spam adds 85 points per post separately, with a final cap of 100. These defaults are configurable except for the fixed recency windows.
 * Offers **Observe**, **Review** and **Protect** modes, plus persistent account exemptions.
 * Lets admins contribute independently confirmed spam back to Stop Forum Spam, with an exact-data confirmation dialog, explicit agreement, duplicate protection, delivery status and audit history. This is included in the free plugin.
@@ -56,12 +56,15 @@ Checks are asynchronous, so they cannot guarantee preventing a first spam post. 
 
 ### Settings and getting started
 
-Install the plugin using the guide above, then open **Admin → Plugins → Spam Guard**.
+Upgrading from Spam Guard requires a maintenance window and the renamed
+`discourse-spam-warden` install directory. See the [upgrade instructions](https://github.com/merefield/discourse-spam-guard/blob/main/docs/rename-upgrade.md) before updating.
 
-* Enable `spam_guard_enabled` to start reputation checks. It defaults off; start with `spam_guard_mode` set to `observe` and review the results before enabling enforcement.
-* Choose `spam_guard_preset`: **conservative** requires strong recent email and IP evidence for automatic protection; **balanced** permits strong recent email evidence alone.
-* Choose which identifiers to look up with `spam_guard_check_email`, `spam_guard_check_ip` and `spam_guard_check_username`. Email and IP default on; username defaults off.
-* Set `spam_guard_recheck_hours` for the delayed registration recheck. It defaults to 24 hours; zero disables it.
+Install the plugin using the guide above, then open **Admin → Plugins → Spam Warden**.
+
+* Enable `spam_warden_enabled` to start reputation checks. It defaults off; start with `spam_warden_mode` set to `observe` and review the results before enabling enforcement.
+* Choose `spam_warden_preset`: **conservative** requires strong recent email and IP evidence for automatic protection; **balanced** permits strong recent email evidence alone.
+* Choose which identifiers to look up with `spam_warden_check_email`, `spam_warden_check_ip` and `spam_warden_check_username`. Email and IP default on; username defaults off.
+* Set `spam_warden_recheck_hours` for the delayed registration recheck. It defaults to 24 hours; zero disables it.
 * Adjust reputation thresholds, point weights, reading adjustments, local signals and scan retention in the plugin settings. [Scoring documentation](https://github.com/merefield/discourse-spam-guard/blob/main/docs/external-scoring.md) explains the calculation.
 
 **No API key is required for reputation lookups.** Reporting spam back to Stop Forum Spam uses a separate API key and enable setting.
@@ -71,9 +74,9 @@ Saved assessments retain their original scores and settings. Older records show 
 ### Discourse AI integration
 
 Included free: saved AI classifications, explanations, scan times, post/review links
-and separate human review outcomes on the admin account dashboard. Spam Guard reuses
+and separate human review outcomes on the admin account dashboard. Spam Warden reuses
 pending AI reviews and consolidates duplicate account reviews in a background job.
-`spam_guard_ai_integration` defaults on when Discourse AI is installed; AI is optional.
+`spam_warden_ai_integration` defaults on when Discourse AI is installed; AI is optional.
 
 AI classifications add no risk points and cannot authorize reports. Human-confirmed
 AI flags use the existing confirmed-spam rule and can lead to the existing account
@@ -82,7 +85,7 @@ additional model calls. See [integration details and scope](https://github.com/m
 
 ### Contributing confirmed spam
 
-Get a key from [Stop Forum Spam’s API key registration page](https://www.stopforumspam.com/signup), then enable `spam_guard_submissions_enabled` and set the secret `spam_guard_submission_api_key`. Reporting is independent of the lookup enable switch and is available to human admins only.
+Get a key from [Stop Forum Spam’s API key registration page](https://www.stopforumspam.com/signup), then enable `spam_warden_submissions_enabled` and set the secret `spam_warden_submission_api_key`. Reporting is independent of the lookup enable switch and is available to human admins only.
 
 On an account's dashboard, choose **Preview report**. The confirmation dialog shows the destination, exact username, email, registration IP and evidence, including the post URL and excerpt. It discloses API-key authentication without exposing the secret. An agreement checkbox is required before submitting; Cancel sends nothing.
 

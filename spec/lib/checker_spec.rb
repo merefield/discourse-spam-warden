@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::Checker do
+RSpec.describe DiscourseSpamWarden::Checker do
   describe ".call" do
     fab!(:user)
     fab!(:admin)
 
     before do
-      SiteSetting.spam_guard_enabled = true
-      SiteSetting.spam_guard_preset = "balanced"
-      SiteSetting.spam_guard_check_ip = false
+      SiteSetting.spam_warden_enabled = true
+      SiteSetting.spam_warden_preset = "balanced"
+      SiteSetting.spam_warden_check_ip = false
       stub_request(:post, "https://api.stopforumspam.org/api").to_return(
         body: {
           success: 1,
@@ -31,7 +31,7 @@ RSpec.describe DiscourseSpamGuard::Checker do
     end
 
     it "adds confirmed spam separately from reading reassurance and retains the configured snapshot" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       stub_request(:post, "https://api.stopforumspam.org/api").to_return(
         body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json,
       )
@@ -62,14 +62,14 @@ RSpec.describe DiscourseSpamGuard::Checker do
       expect(original.policy.dig("assessment", "score")).to eq(85)
       expect(user.reload).not_to be_silenced
 
-      SiteSetting.spam_guard_confirmed_spam_points = 90
+      SiteSetting.spam_warden_confirmed_spam_points = 90
       updated = described_class.call(user, source: "manual")
       expect(updated.policy.dig("assessment", "score")).to eq(90)
       expect(updated.policy.dig("weights", "confirmed_spam")).to eq(90)
       expect(original.reload.policy.dig("weights", "confirmed_spam")).to eq(85)
       expect(original.policy.dig("assessment", "score")).to eq(85)
 
-      SiteSetting.spam_guard_confirmed_spam_points = 80
+      SiteSetting.spam_warden_confirmed_spam_points = 80
       second_review =
         Fabricate(
           :reviewable_flagged_post,
@@ -93,7 +93,7 @@ RSpec.describe DiscourseSpamGuard::Checker do
     end
 
     it "queues evidence for review without restricting the account in review mode" do
-      SiteSetting.spam_guard_mode = "review"
+      SiteSetting.spam_warden_mode = "review"
 
       scan = described_class.call(user, source: "registration")
 
@@ -103,7 +103,7 @@ RSpec.describe DiscourseSpamGuard::Checker do
     end
 
     it "silences strong matches and creates a single review item across repeated jobs" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
 
       scan = described_class.call(user, source: "registration")
       repeated = described_class.call(user, source: "registration")
@@ -111,12 +111,12 @@ RSpec.describe DiscourseSpamGuard::Checker do
       expect(scan.action_taken).to eq("silenced")
       expect(user.reload).to be_silenced
       expect(repeated.id).to eq(scan.id)
-      expect(DiscourseSpamGuard::Scan.where(user: user).count).to eq(1)
-      expect(ReviewableSpamGuard.where(target: user).count).to eq(1)
+      expect(DiscourseSpamWarden::Scan.where(user: user).count).to eq(1)
+      expect(ReviewableSpamWarden.where(target: user).count).to eq(1)
     end
 
     it "keeps manual checks advisory in protect mode" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
 
       scan = described_class.call(user, source: "manual")
 
@@ -125,31 +125,31 @@ RSpec.describe DiscourseSpamGuard::Checker do
     end
 
     it "releases its own silence and honors the account exception on recheck" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       scan = described_class.call(user, source: "registration")
 
-      DiscourseSpamGuard::Moderation.allow(user, admin, reviewable: scan.reviewable)
+      DiscourseSpamWarden::Moderation.allow(user, admin, reviewable: scan.reviewable)
       expect(user.reload).not_to be_silenced
       expect { described_class.call(user, source: "recheck") }.not_to change(
-        DiscourseSpamGuard::Scan,
+        DiscourseSpamWarden::Scan,
         :count,
       )
     end
 
     it "preserves a later staff sanction when allowing the account" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       scan = described_class.call(user, source: "registration")
       UserSilencer.unsilence(user, admin)
       UserSilencer.new(user, admin, reason: "Independent staff decision").silence
 
-      DiscourseSpamGuard::Moderation.allow(user, admin, reviewable: scan.reviewable)
+      DiscourseSpamWarden::Moderation.allow(user, admin, reviewable: scan.reviewable)
 
       expect(user.reload).to be_silenced
-      expect(DiscourseSpamGuard::Account.find_by(user: user)).to be_allowed
+      expect(DiscourseSpamWarden::Account.find_by(user: user)).to be_allowed
     end
 
     it "records unknown evidence without restricting the account when the provider is unavailable" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       stub_request(:post, "https://api.stopforumspam.org/api").to_timeout
 
       scan = described_class.call(user, source: "registration")
@@ -160,13 +160,13 @@ RSpec.describe DiscourseSpamGuard::Checker do
 
     it "excludes staff from automatic checks" do
       expect { described_class.call(admin, source: "registration") }.not_to change(
-        DiscourseSpamGuard::Scan,
+        DiscourseSpamWarden::Scan,
         :count,
       )
     end
 
     it "routes strong external matches to review when reading provides meaningful reassurance" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       user.user_stat.update!(topics_entered: 3, posts_read_count: 10, time_read: 180)
 
       scan = described_class.call(user, source: "recheck")
@@ -179,7 +179,7 @@ RSpec.describe DiscourseSpamGuard::Checker do
     end
 
     it "records zero reading as concern without taking action when no external match exists" do
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       user.update!(created_at: 2.hours.ago)
       user.user_stat.update!(topics_entered: 0, posts_read_count: 0, time_read: 0)
       stub_request(:post, "https://api.stopforumspam.org/api").to_return(
@@ -195,7 +195,7 @@ RSpec.describe DiscourseSpamGuard::Checker do
 
     it "refreshes activity evidence with a cooldown and only requests review for local signals" do
       freeze_time
-      SiteSetting.spam_guard_mode = "protect"
+      SiteSetting.spam_warden_mode = "protect"
       stub_request(:post, "https://api.stopforumspam.org/api").to_return(
         body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json,
       )
@@ -218,19 +218,19 @@ RSpec.describe DiscourseSpamGuard::Checker do
       freeze_time 2.minutes.from_now
       refreshed = described_class.call(user, source: "activity")
       expect(refreshed.id).not_to eq(scan.id)
-      expect(ReviewableSpamGuard.where(target: user).count).to eq(1)
+      expect(ReviewableSpamWarden.where(target: user).count).to eq(1)
     end
 
     it "ignores pending activity jobs when local signals are disabled or the account is exempt" do
-      SiteSetting.spam_guard_local_signals = false
+      SiteSetting.spam_warden_local_signals = false
       expect { described_class.call(user, source: "activity") }.not_to change(
-        DiscourseSpamGuard::Scan,
+        DiscourseSpamWarden::Scan,
         :count,
       )
-      SiteSetting.spam_guard_local_signals = true
-      DiscourseSpamGuard::Moderation.allow(user, admin)
+      SiteSetting.spam_warden_local_signals = true
+      DiscourseSpamWarden::Moderation.allow(user, admin)
       expect { described_class.call(user, source: "activity") }.not_to change(
-        DiscourseSpamGuard::Scan,
+        DiscourseSpamWarden::Scan,
         :count,
       )
     end
@@ -250,15 +250,15 @@ RSpec.describe DiscourseSpamGuard::Checker do
 
     it "preserves an exemption granted while the external check was in progress" do
       stub_request(:post, "https://api.stopforumspam.org/api").to_return do
-        DiscourseSpamGuard::Moderation.allow(user, admin)
+        DiscourseSpamWarden::Moderation.allow(user, admin)
         { body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json }
       end
 
       expect { described_class.call(user, source: "manual") }.not_to change(
-        DiscourseSpamGuard::Scan,
+        DiscourseSpamWarden::Scan,
         :count,
       )
-      expect(DiscourseSpamGuard::Account.find_by(user: user)).to be_allowed
+      expect(DiscourseSpamWarden::Account.find_by(user: user)).to be_allowed
     end
   end
 end
