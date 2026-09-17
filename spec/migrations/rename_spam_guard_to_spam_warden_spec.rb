@@ -7,6 +7,16 @@ RSpec.describe RenameSpamGuardToSpamWarden do
     connection = ActiveRecord::Base.connection
     user = Fabricate(:user)
     admin = Fabricate(:admin)
+    audit_names = %w[
+      spam_guard_allow
+      spam_guard_remove_exception
+      spam_guard_submit_approved
+      spam_guard_submission_preview
+    ]
+    histories =
+      audit_names.map { |name| StaffActionLogger.new(admin).log_custom(name, user_id: user.id) }
+    unrelated = StaffActionLogger.new(admin).log_custom("other_plugin_action", user_id: user.id)
+    original_details = histories.map(&:details)
     account =
       DiscourseSpamWarden::Account.create!(user: user, allowed: true, allowed_by_id: admin.id)
     review = ReviewableSpamWarden.needs_review!(target: user, created_by: admin)
@@ -57,6 +67,11 @@ RSpec.describe RenameSpamGuardToSpamWarden do
 
     described_class.new.up
 
+    expect(histories.map { |history| history.reload.custom_type }).to eq(
+      audit_names.map { |name| name.sub("spam_guard_", "spam_warden_") },
+    )
+    expect(histories.map(&:details)).to eq(original_details)
+    expect(unrelated.reload.custom_type).to eq("other_plugin_action")
     expect(account.reload).to have_attributes(allowed: true, allowed_by_id: admin.id)
     expect(scan.reload.policy).to eq("assessment" => { "score" => 85 })
     expect(report.reload).to have_attributes(status: "unknown", fingerprint: "saved-fingerprint")

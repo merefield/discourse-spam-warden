@@ -31,7 +31,7 @@ class RenameSpamGuardToSpamWarden < ActiveRecord::Migration[8.0]
     SQL
     execute <<~SQL
       UPDATE user_histories SET custom_type = regexp_replace(custom_type, '^spam_guard_', 'spam_warden_')
-      WHERE custom_type IN ('spam_guard_allow', 'spam_guard_remove_exception', 'spam_guard_submit_approved')
+      WHERE custom_type IN ('spam_guard_allow', 'spam_guard_remove_exception', 'spam_guard_submit_approved', 'spam_guard_submission_preview')
     SQL
   end
 

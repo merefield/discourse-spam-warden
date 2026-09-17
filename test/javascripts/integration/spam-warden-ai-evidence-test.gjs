@@ -6,9 +6,21 @@ import pretender, { response } from "discourse/tests/helpers/create-pretender";
 import { i18n } from "discourse-i18n";
 import SpamWardenAiEvidence from "discourse/plugins/discourse-spam-warden/discourse/components/spam-warden-ai-evidence";
 import SpamWardenUser from "discourse/plugins/discourse-spam-warden/discourse/components/spam-warden-user";
+import SpamWardenAiReview from "discourse/plugins/discourse-spam-warden/discourse/connectors/after-reviewable-post-body/spam-warden-ai";
 
 module("Integration | Component | SpamWardenAiEvidence", function (hooks) {
   setupRenderingTest(hooks);
+
+  test("AI review links request the expanded account dashboard", async function (assert) {
+    this.currentUser.set("admin", true);
+    const outletArgs = { model: { spam_warden_ai_account_id: 42 } };
+    await render(
+      <template><SpamWardenAiReview @outletArgs={{outletArgs}} /></template>
+    );
+    assert
+      .dom(".spam-warden-ai-review a")
+      .hasAttribute("href", "/admin/users/42?spamWarden=true#spam-warden");
+  });
 
   test("staff rejection is distinct from AI classification and explanations are escaped", async function (assert) {
     this.currentUser.set("admin", true);

@@ -29,7 +29,7 @@ export default class SpamWardenAiReview extends Component {
                 (concat
                   "/admin/users/"
                   @outletArgs.model.spam_warden_ai_account_id
-                  "#spam-warden"
+                  "?spamWarden=true#spam-warden"
                 )
               }}
             >{{i18n "spam_warden.ai.account"}}</a>
