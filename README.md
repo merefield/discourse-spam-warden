@@ -46,10 +46,10 @@ reputation matches and lack of reading are signals, not proof of spam.
 
 **Upgrading from Spam Guard?** Follow the [rename upgrade instructions](docs/rename-upgrade.md).
 This release requires a maintenance window, post-deployment migrations and the
-`discourse-spam-warden` plugin directory. The GitHub repository URL is unchanged.
+`discourse-spam-warden` plugin directory. The GitHub repository is now `merefield/discourse-spam-warden`.
 
 Follow [Discourse's plugin installation guide](https://meta.discourse.org/t/install-plugins-in-discourse/19157)
-using `https://github.com/merefield/discourse-spam-guard.git`. Installation or upgrade
+using `https://github.com/merefield/discourse-spam-warden.git`. Installation or upgrade
 requires the plugin migrations and a restart/rebuild of the application and background workers.
 
 Open **Admin → Plugins → Spam Warden**. Enable `spam_warden_enabled` and start with

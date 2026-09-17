@@ -4,7 +4,7 @@
 # about: Explainable Stop Forum Spam reputation checks and moderation tools.
 # version: 0.2.0
 # authors: Robert Barrow
-# url: https://github.com/merefield/discourse-spam-guard
+# url: https://github.com/merefield/discourse-spam-warden
 
 # Admin reporting and recovery remain available independently of lookup activation.
 register_asset "stylesheets/common/spam-warden.scss"

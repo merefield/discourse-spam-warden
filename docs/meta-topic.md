@@ -1,11 +1,11 @@
 | | | |
 | - | - | - |
 | :information_source: | **Summary** | A Discourse plugin that combines Stop Forum Spam reputation with local activity to give staff explainable account assessments, review workflows and optional automatic protection. |
-| :hammer_and_wrench: | **Repository Link** | <https://github.com/merefield/discourse-spam-guard> |
+| :hammer_and_wrench: | **Repository Link** | <https://github.com/merefield/discourse-spam-warden> |
 | :open_book: | **Install Guide** | [How to install plugins in Discourse](https://meta.discourse.org/t/install-plugins-in-discourse/19157) |
 | :heart: | **Sponsorship** | Please consider becoming an ongoing [sponsor of my open source work](https://github.com/sponsors/merefield) at a level that suits your or your organisation's resources and needs to help maintain this plugin. |
 
-Enjoying this plugin? Please :star: it on [GitHub](https://github.com/merefield/discourse-spam-guard)! :pray:
+Enjoying this plugin? Please :star: it on [GitHub](https://github.com/merefield/discourse-spam-warden)! :pray:
 
 ### Why use it?
 
@@ -57,7 +57,7 @@ Checks are asynchronous, so they cannot guarantee preventing a first spam post. 
 ### Settings and getting started
 
 Upgrading from Spam Guard requires a maintenance window and the renamed
-`discourse-spam-warden` install directory. See the [upgrade instructions](https://github.com/merefield/discourse-spam-guard/blob/main/docs/rename-upgrade.md) before updating.
+`discourse-spam-warden` install directory. See the [upgrade instructions](https://github.com/merefield/discourse-spam-warden/blob/main/docs/rename-upgrade.md) before updating.
 
 Install the plugin using the guide above, then open **Admin → Plugins → Spam Warden**.
 
@@ -65,7 +65,7 @@ Install the plugin using the guide above, then open **Admin → Plugins → Spam
 * Choose `spam_warden_preset`: **conservative** requires strong recent email and IP evidence for automatic protection; **balanced** permits strong recent email evidence alone.
 * Choose which identifiers to look up with `spam_warden_check_email`, `spam_warden_check_ip` and `spam_warden_check_username`. Email and IP default on; username defaults off.
 * Set `spam_warden_recheck_hours` for the delayed registration recheck. It defaults to 24 hours; zero disables it.
-* Adjust reputation thresholds, point weights, reading adjustments, local signals and scan retention in the plugin settings. [Scoring documentation](https://github.com/merefield/discourse-spam-guard/blob/main/docs/external-scoring.md) explains the calculation.
+* Adjust reputation thresholds, point weights, reading adjustments, local signals and scan retention in the plugin settings. [Scoring documentation](https://github.com/merefield/discourse-spam-warden/blob/main/docs/external-scoring.md) explains the calculation.
 
 **No API key is required for reputation lookups.** Reporting spam back to Stop Forum Spam uses a separate API key and enable setting.
 
@@ -81,7 +81,7 @@ pending AI reviews and consolidates duplicate account reviews in a background jo
 AI classifications add no risk points and cannot authorize reports. Human-confirmed
 AI flags use the existing confirmed-spam rule and can lead to the existing account
 reporting preview, with explicit admin approval. Refresh reads saved results without
-additional model calls. See [integration details and scope](https://github.com/merefield/discourse-spam-guard/blob/main/docs/ai-integration.md).
+additional model calls. See [integration details and scope](https://github.com/merefield/discourse-spam-warden/blob/main/docs/ai-integration.md).
 
 ### Contributing confirmed spam
 
@@ -93,7 +93,7 @@ A qualifying report requires a spam flag agreed with by human staff within the l
 
 After approval, the dashboard shows **Queued**. Use **Refresh submission status** to check delivery. **Submitted successfully** means the provider returned JSON success or its documented empty HTTP 200 success response. History shows the approving admin’s current username linked to their admin page, with an ID fallback for deleted accounts. Uncertain deliveries are blocked from resubmission to avoid duplicates; the dashboard explains recovery options. Existing uncertain records are not automatically reclassified after upgrading.
 
-Reporting is always a separate, explicit action: choosing Review or Protect mode does not send reports. See [reporting safeguards and recovery](https://github.com/merefield/discourse-spam-guard/blob/main/docs/submissions.md).
+Reporting is always a separate, explicit action: choosing Review or Protect mode does not send reports. See [reporting safeguards and recovery](https://github.com/merefield/discourse-spam-warden/blob/main/docs/submissions.md).
 
 ### Privacy and storage
 

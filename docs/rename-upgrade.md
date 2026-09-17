@@ -11,11 +11,11 @@ including post-deployment migrations, rebuild assets, then restart both processe
 Do not skip post-deployment migrations: the new code requires the renamed tables.
 Do not run old and new versions simultaneously.
 
-The GitHub repository remains `merefield/discourse-spam-guard` until separately
-renamed. Clone it into a directory named `discourse-spam-warden`:
+The GitHub repository is now `merefield/discourse-spam-warden`. Clone it into a
+directory named `discourse-spam-warden`:
 
 ```yaml
-- git clone https://github.com/merefield/discourse-spam-guard.git discourse-spam-warden
+- git clone https://github.com/merefield/discourse-spam-warden.git discourse-spam-warden
 ```
 
 Replace the previous clone line and remove the old plugin directory from the
