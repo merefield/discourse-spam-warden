@@ -5,11 +5,11 @@ Spam reputation. It does not run a classifier or make additional LLM requests.
 
 ## Setup and dashboard
 
-`spam_guard_ai_integration` defaults on. It takes effect only when Discourse AI and
+`spam_warden_ai_integration` defaults on. It takes effect only when Discourse AI and
 its spam-log table are available. Disable it to stop AI evidence display and review
-coordination. Spam Guard works without Discourse AI installed.
+coordination. Spam Warden works without Discourse AI installed.
 
-Open an admin user page and expand **Spam Guard**. The AI panel shows classification,
+Open an admin user page and expand **Spam Warden**. The AI panel shows classification,
 explanation, scan time, links to the post and review, and the human review outcome.
 Pending, confirmed, rejected, ignored and no human decision are separate states.
 The latest AI classification does not replace a human decision. Linked reviews must match
@@ -26,17 +26,17 @@ clean bill of health. Retained logs remain readable if AI scanning is subsequent
 
 ## Reviews and restrictions
 
-When a reputation check needs review, Spam Guard reuses a pending AI spam review for
+When a reputation check needs review, Spam Warden reuses a pending AI spam review for
 that account within the same bounded sample. It attaches its own saved assessment
 without modifying the AI flag, classification or review payload. The review shows the
-linked Spam Guard evidence, and admins can open the account dashboard from it.
+linked Spam Warden evidence, and admins can open the account dashboard from it.
 
 If the account review was created first, a background job scheduled after an AI flag
 moves linked assessments to the pending AI review and closes the duplicate account
 review as ignored. Its history and destination review ID are retained. A brief overlap
 is possible while the job waits. Completed AI reviews are never reopened or reused.
 Existing restrictions remain in place; an exemption only reverses a silence still
-owned by Spam Guard. Discourse AI keeps its own independent moderation policy.
+owned by Spam Warden. Discourse AI keeps its own independent moderation policy.
 
 ## Scoring and reporting
 
@@ -57,7 +57,7 @@ Nothing is submitted automatically. See [submission safeguards](submissions.md).
 ## Privacy and implementation
 
 AI explanations are admin-only. Raw prompts, model payloads and audit-log contents are
-not returned by Spam Guard. No AI evidence is copied into its tables or sent to Stop
+not returned by Spam Warden. No AI evidence is copied into its tables or sent to Stop
 Forum Spam. AI retains ownership of its logs and their retention policy.
 
 The adapter reads `AiSpamLog` and core `ReviewableFlaggedPost` / `ReviewableScore` records.

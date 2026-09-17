@@ -1,4 +1,4 @@
-# Discourse Spam Guard
+# Discourse Spam Warden
 
 Explainable Stop Forum Spam reputation checks, account risk dashboards and moderation
 workflows for Discourse. The free plugin also supports individually approved reports
@@ -6,7 +6,7 @@ of locally confirmed spam back to Stop Forum Spam. Licensed under GPLv2.
 
 ## Why use it?
 
-Spam Guard brings external reputation and activity on your own forum together in
+Spam Warden brings external reputation and activity on your own forum together in
 one place, so staff can see why an account needs attention and decide what to do.
 
 - **Understand the evidence.** Inspect the reports, their recency, reading activity
@@ -31,7 +31,7 @@ between suspicion, confirmed spam and an action taken explicit.
 - Email and public registration IP reputation, with optional username evidence.
 - An expandable admin user dashboard showing evidence, score breakdown, activity,
   moderation history and action taken.
-- A compact Spam Guard column on the admin user list, linking directly to the expanded
+- A compact Spam Warden column on the admin user list, linking directly to the expanded
   dashboard. Missing assessments show grey N/A; exemptions show a labelled blue override.
 - Configurable per-report weights and caps, one reading adjustment, and capped
   local signals from duplicate posts, posting bursts and staff-confirmed spam posts.
@@ -44,14 +44,18 @@ reputation matches and lack of reading are signals, not proof of spam.
 
 ## Installation and setup
 
+**Upgrading from Spam Guard?** Follow the [rename upgrade instructions](docs/rename-upgrade.md).
+This release requires a maintenance window, post-deployment migrations and the
+`discourse-spam-warden` plugin directory. The GitHub repository is now `merefield/discourse-spam-warden`.
+
 Follow [Discourse's plugin installation guide](https://meta.discourse.org/t/install-plugins-in-discourse/19157)
-using `https://github.com/merefield/discourse-spam-guard.git`. Installation or upgrade
+using `https://github.com/merefield/discourse-spam-warden.git`. Installation or upgrade
 requires the plugin migrations and a restart/rebuild of the application and background workers.
 
-Open **Admin → Plugins → Spam Guard**. Enable `spam_guard_enabled` and start with
-`spam_guard_mode` set to `observe`. Checks default off. **Reputation lookups need no API key.**
+Open **Admin → Plugins → Spam Warden**. Enable `spam_warden_enabled` and start with
+`spam_warden_mode` set to `observe`. Checks default off. **Reputation lookups need no API key.**
 Email and IP lookups default on; username lookup defaults off. The delayed recheck
-is 24 hours by default; set `spam_guard_recheck_hours` to zero to disable it.
+is 24 hours by default; set `spam_warden_recheck_hours` to zero to disable it.
 
 | Mode | Behaviour |
 | --- | --- |
@@ -83,7 +87,7 @@ remain separate. Username and AI evidence add no numeric points.
 
 The account dashboard places a succinct saved-score explanation above a compact
 calculation column and separate evidence cards. It stacks on smaller screens, with
-methodology expandable and account actions directly below the Spam Guard header.
+methodology expandable and account actions directly below the Spam Warden header.
 At wide container sizes, the risk score and breakdown boxes align in one column.
 Saved assessments keep their original
 scores and weights; older records show a legacy breakdown. Recheck to apply version 8.
@@ -96,20 +100,20 @@ and [status design](docs/status-design.md).
 
 The free plugin optionally shows saved AI spam findings, human review outcomes and
 post/review links on the account dashboard. It reuses pending AI reviews and consolidates
-duplicate account reviews. `spam_guard_ai_integration` defaults on when AI is installed.
+duplicate account reviews. `spam_warden_ai_integration` defaults on when AI is installed.
 AI classifications add no risk points; human-confirmed spam uses the existing rule.
 Confirmed findings link to the existing, explicitly approved account reporting preview.
 No additional LLM calls are made. See [AI integration](docs/ai-integration.md).
 
 ## Reporting confirmed spam
 
-Reporting has separate controls: enable `spam_guard_submissions_enabled` and configure
-the secret `spam_guard_submission_api_key`, available from
+Reporting has separate controls: enable `spam_warden_submissions_enabled` and configure
+the secret `spam_warden_submission_api_key`, available from
 [Stop Forum Spam’s API key registration page](https://www.stopforumspam.com/signup).
 Reporting, retained evidence and recovery
 remain accessible when lookups are disabled.
 
-Open a user's Spam Guard dashboard and choose **Preview report**. The confirmation
+Open a user's Spam Warden dashboard and choose **Preview report**. The confirmation
 dialog shows the destination, exact identifiers and evidence. The admin must explicitly
 agree before submitting. Eligibility requires independently staff-confirmed spam in a
 public topic; suspicious registrations and high scores alone do not qualify.
@@ -141,7 +145,7 @@ remain independently of scan retention to prevent duplicate reports. Local remov
 exemption does not retract a report already sent to Stop Forum Spam.
 
 **Allow this account** grants an exemption and only reverses a silence still owned by
-Spam Guard. Independent staff silences and suspensions are preserved. Removing an
+Spam Warden. Independent staff silences and suspensions are preserved. Removing an
 exemption does not immediately reenforce an old decision.
 
 ## Core integration and development
@@ -154,8 +158,8 @@ GitHub Actions uses Discourse's standard reusable plugin workflow against upstre
 `latest`, covering lint, backend, frontend, system and model annotations.
 
 ```sh
-LOAD_PLUGINS=1 bin/rspec plugins/discourse-spam-guard/spec
-bin/qunit --standalone --target discourse-spam-guard
+LOAD_PLUGINS=1 bin/rspec plugins/discourse-spam-warden/spec
+bin/qunit --standalone --target discourse-spam-warden
 ```
 
 Run these from a Discourse checkout with the plugin installed. Provider requests in tests

@@ -1,6 +1,6 @@
 en:
   js:
-    spam_guard:
+    spam_warden:
       calculation:
         how: "How scoring works"
         summary: "Email reports contributed %{email} points and IP reports %{ip}. Activity and reading adjusted suspicion by %{adjustment} points."
@@ -39,7 +39,7 @@ en:
         error: "The AI log records a processing or action error; classification does not confirm that any action was taken."
         post: "View post"
         review: "View staff review"
-        account: "View Spam Guard account assessment and reporting"
+        account: "View Spam Warden account assessment and reporting"
         report: "Preview account report to Stop Forum Spam"
         empty: "No recent AI findings for eligible posts."
         scope: "Shows up to 10 latest post assessments from the last 30 days, sampling up to 100 recent posts in public topics. Older scans and private content are excluded. A not-spam classification applies to that post, not the entire account."
@@ -52,7 +52,7 @@ en:
       submission:
         title: "Report confirmed spam"
         description: "Contribute independently confirmed spam to Stop Forum Spam. A risk score or suspicious registration alone is not sufficient."
-        configure: "Enable submissions and add your API key in Spam Guard settings."
+        configure: "Enable submissions and add your API key in Spam Warden settings."
         preview: "Preview report"
         refresh: "Refresh submission status"
         preview_title: "Confirm report to Stop Forum Spam"
@@ -94,7 +94,7 @@ en:
           cancelled: "Eligibility, permissions, approved content or reporting settings changed, or approval expired before delivery. Refresh to check whether a new report is eligible."
       confirm_restriction: "Confirm existing restriction"
       additional_evidence: "Additional evidence"
-      open_user_dashboard: "Open Spam Guard dashboard for %{username}"
+      open_user_dashboard: "Open Spam Warden dashboard for %{username}"
       dashboard:
         risk_score: "Risk score"
         high_concern: "High concern"
@@ -102,7 +102,7 @@ en:
         suspicious: "Suspicious"
         no_scored_concern: "No scored concern"
         exempt: "Exempt"
-        exempt_note: "Manual override · Spam Guard checks are bypassed. Any score shown is the last saved assessment."
+        exempt_note: "Manual override · Spam Warden checks are bypassed. Any score shown is the last saved assessment."
         percentage: "%{value}%"
         not_scored: "Not scored"
         na: "N/A"
@@ -159,9 +159,9 @@ en:
           limited: "Limited reading activity provides a small amount of reassurance."
           meaningful: "Meaningful reading activity reduces concern and routes strong matches to human review."
           sustained: "Reading activity and repeat visits provide stronger reassurance; the reduction is capped."
-      title: "Spam Guard"
+      title: "Spam Warden"
       activity: "Activity and checks"
-      description: "Review account reputation evidence and see what Spam Guard did."
+      description: "Review account reputation evidence and see what Spam Warden did."
       setup_help: "Configure the checks and protection mode in Settings. Email addresses and public registration IPs are sent to Stop Forum Spam when their checks are enabled. Checks run in the background; they do not guarantee blocking a first post."
       disabled: "Automatic checks are disabled. You can still view history and resolve existing reviews."
       mode_label: "Protection mode:"
@@ -175,18 +175,18 @@ en:
       check_user: "Check an account"
       recheck_account: "Recheck account"
       check_complete: "Check complete."
-      exempt: "This account is exempt from Spam Guard checks."
+      exempt: "This account is exempt from Spam Warden checks."
       user_id: "User ID"
       user: "Account"
       evidence: "Evidence"
       action: "Action taken"
       details: "View evidence"
       recent: "Recent checks"
-      empty: "No checks yet. Enable Spam Guard in Settings to observe new registrations."
+      empty: "No checks yet. Enable Spam Warden in Settings to observe new registrations."
       open_review: "Open review"
       allow: "Allow this account"
-      expand_dashboard: "Expand Spam Guard dashboard"
-      collapse_dashboard: "Collapse Spam Guard dashboard"
+      expand_dashboard: "Expand Spam Warden dashboard"
+      collapse_dashboard: "Collapse Spam Warden dashboard"
       remove_exception: "Remove account exception"
       exception_updated: "Account exception updated."
       confirm: "Confirm spam and silence"
@@ -227,5 +227,5 @@ en:
         untested: "Provider connection has not been tested."
     review:
       types:
-        reviewable_spam_guard:
-          title: "Spam Guard account"
+        reviewable_spam_warden:
+          title: "Spam Warden account"

@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-RSpec.describe Jobs::SpamGuardCheck do
+RSpec.describe Jobs::SpamWardenCheck do
   describe "#execute" do
     fab!(:user)
 
     before do
-      SiteSetting.spam_guard_enabled = true
-      SiteSetting.spam_guard_check_ip = false
+      SiteSetting.spam_warden_enabled = true
+      SiteSetting.spam_warden_check_ip = false
       Jobs.run_later!
     end
 
@@ -15,7 +15,7 @@ RSpec.describe Jobs::SpamGuardCheck do
       stub_request(:post, "https://api.stopforumspam.org/api").to_timeout
 
       expect_enqueued_with(
-        job: :spam_guard_check,
+        job: :spam_warden_check,
         args: {
           user_id: user.id,
           source: "registration",
@@ -28,7 +28,7 @@ RSpec.describe Jobs::SpamGuardCheck do
     it "stops retrying after the final attempt" do
       stub_request(:post, "https://api.stopforumspam.org/api").to_timeout
 
-      expect_not_enqueued_with(job: :spam_guard_check) do
+      expect_not_enqueued_with(job: :spam_warden_check) do
         described_class.new.execute(user_id: user.id, source: "registration", attempt: 2)
       end
     end
@@ -42,7 +42,7 @@ RSpec.describe Jobs::SpamGuardCheck do
 
       expect {
         described_class.new.execute(user_id: user.id, source: "registration")
-      }.not_to change(DiscourseSpamGuard::Scan, :count)
+      }.not_to change(DiscourseSpamWarden::Scan, :count)
     end
 
     it "preserves a follow-up when an activity job encounters the execution cooldown" do
@@ -50,11 +50,11 @@ RSpec.describe Jobs::SpamGuardCheck do
       stub_request(:post, "https://api.stopforumspam.org/api").to_return(
         body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json,
       )
-      DiscourseSpamGuard::Checker.call(user, source: "activity")
+      DiscourseSpamWarden::Checker.call(user, source: "activity")
       freeze_time 10.seconds.from_now
 
       expect_enqueued_with(
-        job: :spam_guard_check,
+        job: :spam_warden_check,
         args: {
           user_id: user.id,
           source: "activity",
@@ -66,10 +66,10 @@ RSpec.describe Jobs::SpamGuardCheck do
     it "bounds activity outage retries even when the previous scan was reused" do
       freeze_time
       stub_request(:post, "https://api.stopforumspam.org/api").to_timeout
-      DiscourseSpamGuard::Checker.call(user, source: "activity")
+      DiscourseSpamWarden::Checker.call(user, source: "activity")
       freeze_time 10.seconds.from_now
 
-      expect_not_enqueued_with(job: :spam_guard_check) do
+      expect_not_enqueued_with(job: :spam_warden_check) do
         described_class.new.execute(user_id: user.id, source: "activity", attempt: 2)
       end
     end

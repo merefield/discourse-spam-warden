@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::AdminController do
+RSpec.describe DiscourseSpamWarden::AdminController do
   fab!(:user)
   fab!(:admin)
   fab!(:moderator)
-  fab!(:spam_post) { Fabricate(:spam_guard_confirmed_post, user: user) }
-  let(:url) { "/admin/plugins/discourse-spam-guard/accounts/#{user.id}/submission.json" }
+  fab!(:spam_post) { Fabricate(:spam_warden_confirmed_post, user: user) }
+  let(:url) { "/admin/plugins/discourse-spam-warden/accounts/#{user.id}/submission.json" }
 
   before do
-    SiteSetting.spam_guard_submissions_enabled = true
-    SiteSetting.spam_guard_submission_api_key = "private-test-key"
+    SiteSetting.spam_warden_submissions_enabled = true
+    SiteSetting.spam_warden_submission_api_key = "private-test-key"
     Jobs.run_later!
   end
 
-  describe "GET /admin/plugins/discourse-spam-guard/accounts/:user_id/submission" do
+  describe "GET /admin/plugins/discourse-spam-warden/accounts/:user_id/submission" do
     it "denies anonymous, ordinary and moderator access to identifiers" do
       get url
       expect(response.status).to eq(404)
@@ -31,22 +31,22 @@ RSpec.describe DiscourseSpamGuard::AdminController do
       expect(response.status).to eq(200)
       expect(response.parsed_body["preview"]).to include(
         "email" => user.email,
-        "destination" => DiscourseSpamGuard::SubmissionClient::ENDPOINT,
+        "destination" => DiscourseSpamWarden::SubmissionClient::ENDPOINT,
         "ip_address" => user.registration_ip_address.to_s,
         "post_id" => spam_post.id,
       )
-      expect(response.body).not_to include(SiteSetting.spam_guard_submission_api_key)
+      expect(response.body).not_to include(SiteSetting.spam_warden_submission_api_key)
     end
   end
 
-  describe "POST /admin/plugins/discourse-spam-guard/accounts/:user_id/submission" do
+  describe "POST /admin/plugins/discourse-spam-warden/accounts/:user_id/submission" do
     it "denies non-admin submission" do
       [user, moderator].each do |actor|
         sign_in(actor)
         post url, params: { token: "invalid", confirmed: true }
         expect(response.status).to eq(404)
       end
-      expect(DiscourseSpamGuard::Submission.count).to eq(0)
+      expect(DiscourseSpamWarden::Submission.count).to eq(0)
     end
 
     it "queues explicitly approved evidence and keeps credentials out of its response" do
@@ -60,7 +60,7 @@ RSpec.describe DiscourseSpamGuard::AdminController do
         "actor_id" => admin.id,
         "actor_username" => admin.username,
       )
-      expect(response.body).not_to include(SiteSetting.spam_guard_submission_api_key)
+      expect(response.body).not_to include(SiteSetting.spam_warden_submission_api_key)
     end
   end
 end

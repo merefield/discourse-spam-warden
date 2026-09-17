@@ -1,28 +1,28 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::AdditionalEvidence do
+RSpec.describe DiscourseSpamWarden::AdditionalEvidence do
   fab!(:user)
   let(:plugin) { Plugin::Instance.new }
   let(:entries) { [{ "label" => "Extension evidence", "points" => 25 }] }
   let(:modifier) { proc { |_value, _user_id, _source| entries } }
 
   before do
-    SiteSetting.spam_guard_enabled = true
+    SiteSetting.spam_warden_enabled = true
     plugin.stubs(:enabled?).returns(true)
-    SiteSetting.spam_guard_mode = "protect"
-    SiteSetting.spam_guard_check_ip = false
-    DiscoursePluginRegistry.register_modifier(plugin, :spam_guard_additional_evidence, &modifier)
+    SiteSetting.spam_warden_mode = "protect"
+    SiteSetting.spam_warden_check_ip = false
+    DiscoursePluginRegistry.register_modifier(plugin, :spam_warden_additional_evidence, &modifier)
     stub_request(:post, "https://api.stopforumspam.org/api").to_return(
       body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json,
     )
   end
 
   after do
-    DiscoursePluginRegistry.unregister_modifier(plugin, :spam_guard_additional_evidence, &modifier)
+    DiscoursePluginRegistry.unregister_modifier(plugin, :spam_warden_additional_evidence, &modifier)
   end
 
   it "persists extension evidence before assessment and only requests review" do
-    scan = DiscourseSpamGuard::Checker.call(user, source: "registration")
+    scan = DiscourseSpamWarden::Checker.call(user, source: "registration")
     expect(scan).to have_attributes(decision: "review", action_taken: "review")
     expect(scan.policy.dig("assessment", "additional_evidence")).to eq(entries)
     expect(user.reload).not_to be_silenced
@@ -30,12 +30,12 @@ RSpec.describe DiscourseSpamGuard::AdditionalEvidence do
 
   it "ignores disabled extensions and preserves account exemptions" do
     plugin.stubs(:enabled?).returns(false)
-    scan = DiscourseSpamGuard::Checker.call(user, source: "manual")
+    scan = DiscourseSpamWarden::Checker.call(user, source: "manual")
     expect(scan.policy.dig("assessment", "additional_evidence")).to eq([])
-    DiscourseSpamGuard::Account.create!(user: user, allowed: true)
+    DiscourseSpamWarden::Account.create!(user: user, allowed: true)
     plugin.stubs(:enabled?).returns(true)
-    expect { DiscourseSpamGuard::Checker.call(user, source: "manual") }.not_to change(
-      DiscourseSpamGuard::Scan,
+    expect { DiscourseSpamWarden::Checker.call(user, source: "manual") }.not_to change(
+      DiscourseSpamWarden::Scan,
       :count,
     )
   end
@@ -61,7 +61,7 @@ RSpec.describe DiscourseSpamGuard::AdditionalEvidence do
     let(:modifier) { proc { raise "unavailable" } }
 
     it "continues the free check without extension evidence" do
-      scan = DiscourseSpamGuard::Checker.call(user, source: "registration")
+      scan = DiscourseSpamWarden::Checker.call(user, source: "registration")
       expect(scan).to have_attributes(status: "checked", decision: "allow", action_taken: "none")
       expect(scan.policy.dig("assessment", "additional_evidence")).to eq([])
     end

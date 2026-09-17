@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::SubmissionClient do
+RSpec.describe DiscourseSpamWarden::SubmissionClient do
   describe "#submit" do
     let(:payload) do
       {
@@ -11,7 +11,7 @@ RSpec.describe DiscourseSpamGuard::SubmissionClient do
       }
     end
 
-    before { SiteSetting.spam_guard_submission_api_key = "secret&key" }
+    before { SiteSetting.spam_warden_submission_api_key = "secret&key" }
 
     it "form-encodes identifiers, evidence and credentials and accepts JSON success" do
       request =

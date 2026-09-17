@@ -50,7 +50,7 @@ collected by the following check.
 
 ## Populated-data verification
 
-Run `bin/rspec plugins/discourse-spam-guard/docs/query-profile.rb` with plugins
+Run `bin/rspec plugins/discourse-spam-warden/docs/query-profile.rb` with plugins
 loaded. The standalone profile creates 100,000 scans across ten accounts, 10,000
 posts and 100,000 flag scores inside a rolled-back test transaction. It prints
 plans; timings are not pass/fail assertions.

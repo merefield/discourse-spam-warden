@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::SubmissionCandidate do
+RSpec.describe DiscourseSpamWarden::SubmissionCandidate do
   fab!(:user)
   fab!(:admin)
-  fab!(:post) { Fabricate(:spam_guard_confirmed_post, user: user) }
+  fab!(:post) { Fabricate(:spam_warden_confirmed_post, user: user) }
 
   describe ".latest" do
     it "includes retained public spam with the registration IP and bounded evidence" do
@@ -67,7 +67,7 @@ RSpec.describe DiscourseSpamGuard::SubmissionCandidate do
       user.update!(registration_ip_address: "192.168.1.5")
       expect(described_class.latest(user)).to be_nil
       user.update!(registration_ip_address: "8.8.4.4")
-      DiscourseSpamGuard::Moderation.allow(user, admin)
+      DiscourseSpamWarden::Moderation.allow(user, admin)
       expect(described_class.latest(user)).to be_nil
     end
   end

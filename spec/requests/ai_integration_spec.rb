@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 if defined?(::AiSpamLog)
-  RSpec.describe DiscourseSpamGuard::AdminController do
+  RSpec.describe DiscourseSpamWarden::AdminController do
     fab!(:admin)
     fab!(:moderator)
     fab!(:user)
@@ -29,7 +29,7 @@ if defined?(::AiSpamLog)
     describe "#account" do
       it "returns saved AI evidence only to admins without raw prompts" do
         sign_in(admin)
-        get "/admin/plugins/discourse-spam-guard/accounts/#{user.id}.json"
+        get "/admin/plugins/discourse-spam-warden/accounts/#{user.id}.json"
         expect(response.status).to eq(200)
         expect(response.parsed_body.dig("ai_evidence", "entries").sole).to include(
           "reason" => log.reason,
@@ -38,10 +38,10 @@ if defined?(::AiSpamLog)
         expect(response.body).not_to include(log.payload)
 
         sign_in(moderator)
-        get "/admin/plugins/discourse-spam-guard/accounts/#{user.id}.json"
+        get "/admin/plugins/discourse-spam-warden/accounts/#{user.id}.json"
         expect(response.status).to eq(404)
         sign_in(user)
-        get "/admin/plugins/discourse-spam-guard/accounts/#{user.id}.json"
+        get "/admin/plugins/discourse-spam-warden/accounts/#{user.id}.json"
         expect(response.status).to eq(404)
       end
     end
@@ -49,7 +49,7 @@ if defined?(::AiSpamLog)
     describe "review evidence" do
       it "batches linked scan evidence and restricts admin account navigation" do
         scan =
-          DiscourseSpamGuard::Scan.create!(
+          DiscourseSpamWarden::Scan.create!(
             user: user,
             reviewable: review,
             source: "manual",
@@ -61,16 +61,16 @@ if defined?(::AiSpamLog)
           track_sql_queries { get "/review.json", params: { type: "ReviewableFlaggedPost" } }
         expect(response.status).to eq(200)
         entry = response.parsed_body["reviewables"].find { |item| item["id"] == review.id }
-        expect(entry["spam_guard_ai_account_id"]).to eq(user.id)
-        expect(entry.dig("spam_guard_scan", "id")).to eq(scan.id)
-        expect(queries.count { |sql| sql.include?("FROM \"spam_guard_scans\"") }).to eq(1)
+        expect(entry["spam_warden_ai_account_id"]).to eq(user.id)
+        expect(entry.dig("spam_warden_scan", "id")).to eq(scan.id)
+        expect(queries.count { |sql| sql.include?("FROM \"spam_warden_scans\"") }).to eq(1)
         expect(queries.count { |sql| sql.include?("FROM \"ai_spam_logs\"") }).to eq(1)
 
         sign_in(moderator)
         get "/review/#{review.id}.json"
         expect(response.status).to eq(200)
-        expect(response.parsed_body["reviewable"]).not_to have_key("spam_guard_ai_account_id")
-        expect(response.parsed_body.dig("reviewable", "spam_guard_scan", "id")).to eq(scan.id)
+        expect(response.parsed_body["reviewable"]).not_to have_key("spam_warden_ai_account_id")
+        expect(response.parsed_body.dig("reviewable", "spam_warden_scan", "id")).to eq(scan.id)
         expect(response.body).not_to include(log.payload, log.reason)
       end
     end

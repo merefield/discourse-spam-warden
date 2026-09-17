@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::UpdateException do
+RSpec.describe DiscourseSpamWarden::UpdateException do
   describe described_class::Contract, type: :model do
     it { is_expected.to validate_presence_of(:user_id) }
     it { is_expected.to allow_values(true, false).for(:allowed) }
@@ -47,10 +47,10 @@ RSpec.describe DiscourseSpamGuard::UpdateException do
 
     context "when an administrator grants an exception" do
       it "records the actor and keeps the action available when checking is disabled" do
-        SiteSetting.spam_guard_enabled = false
+        SiteSetting.spam_warden_enabled = false
 
         expect(result).to run_successfully
-        expect(DiscourseSpamGuard::Account.find_by(user: user)).to have_attributes(
+        expect(DiscourseSpamWarden::Account.find_by(user: user)).to have_attributes(
           allowed: true,
           allowed_by_id: actor.id,
         )
@@ -64,10 +64,10 @@ RSpec.describe DiscourseSpamGuard::UpdateException do
       end
 
       it "releases its own silence and resolves the pending review with one staff log entry" do
-        SiteSetting.spam_guard_enabled = true
-        SiteSetting.spam_guard_mode = "protect"
-        SiteSetting.spam_guard_preset = "balanced"
-        SiteSetting.spam_guard_check_ip = false
+        SiteSetting.spam_warden_enabled = true
+        SiteSetting.spam_warden_mode = "protect"
+        SiteSetting.spam_warden_preset = "balanced"
+        SiteSetting.spam_warden_check_ip = false
         stub_request(:post, "https://api.stopforumspam.org/api").to_return(
           body: {
             success: 1,
@@ -79,10 +79,10 @@ RSpec.describe DiscourseSpamGuard::UpdateException do
             },
           }.to_json,
         )
-        scan = DiscourseSpamGuard::Checker.call(user, source: "registration")
+        scan = DiscourseSpamWarden::Checker.call(user, source: "registration")
 
         expect { expect(result).to run_successfully }.to change {
-          UserHistory.where(custom_type: "spam_guard_allow", acting_user_id: actor.id).count
+          UserHistory.where(custom_type: "spam_warden_allow", acting_user_id: actor.id).count
         }.by(1)
         expect(user.reload).not_to be_silenced
         expect(scan.reviewable.reload).to be_approved
@@ -92,16 +92,16 @@ RSpec.describe DiscourseSpamGuard::UpdateException do
     context "when an administrator removes an exception" do
       let(:params) { { user_id: user.id, allowed: false } }
 
-      before { DiscourseSpamGuard::Moderation.allow(user, actor) }
+      before { DiscourseSpamWarden::Moderation.allow(user, actor) }
 
       it "resumes eligibility without automatically checking or restricting the account" do
         expect(result).to run_successfully
-        expect(DiscourseSpamGuard::Account.find_by(user: user)).to have_attributes(
+        expect(DiscourseSpamWarden::Account.find_by(user: user)).to have_attributes(
           allowed: false,
           allowed_by_id: nil,
         )
         expect(user.reload).not_to be_silenced
-        expect(DiscourseSpamGuard::Scan.where(user: user)).to be_empty
+        expect(DiscourseSpamWarden::Scan.where(user: user)).to be_empty
       end
     end
   end

@@ -43,7 +43,7 @@ record the original audit. Runtime fixes have subsequently been implemented.
 - The manual form uses the core user chooser and submits the selected account ID.
 - Qualifying local evidence can request review when a provider check fails or is
   skipped. Such assessments remain unscored and cannot automatically silence.
-- `spam_guard_additional_evidence` is a core registry modifier called before
+- `spam_warden_additional_evidence` is a core registry modifier called before
   assessment, outside the user row lock. Contributions are bounded, displayed and
   persisted. Extension failures leave free checks working; contributions can
   request review but never elevate a decision to automatic silence.
@@ -78,7 +78,7 @@ need correction before describing the integration as complete.
 
 `plugin.rb:69–77` registers deletion/anonymisation using the plugin `on` helper.
 Core `lib/plugin/instance.rb:673` gates that helper on `enabled?`. Consequently,
-anonymising an account while `spam_guard_enabled` is false leaves its scans and
+anonymising an account while `spam_warden_enabled` is false leaves its scans and
 exception record attached to the anonymised user. Daily orphan cleanup cannot
 repair this because the user still exists. Pending review evidence is also exempt
 from normal age-based scan expiry. Deletion leaves records until orphan cleanup.
@@ -89,8 +89,8 @@ anonymisation and deletion coverage; current lifecycle coverage enables the plug
 
 ### Medium: review serialization has N+1 queries
 
-`app/serializers/reviewable_spam_guard_serializer.rb:7` finds the referenced scan
-for every review. `SpamGuardScanSerializer#username` then loads `scan.user`.
+`app/serializers/reviewable_spam_warden_serializer.rb:7` finds the referenced scan
+for every review. `SpamWardenScanSerializer#username` then loads `scan.user`.
 Core `Reviewable.viewable_by` preloads the review target, but neither the scan nor
 that separately loaded scan's user association. A page with N matching reviews
 therefore adds approximately 2N queries when their scans exist.
@@ -101,7 +101,7 @@ counts. The existing batched admin user list does not suffer from this issue.
 
 ### Medium: some links bypass core subfolder routing
 
-`spam-guard-dashboard.gjs` and `reviewable-spam-guard.gjs` construct root-relative
+`spam-warden-dashboard.gjs` and `reviewable-spam-warden.gjs` construct root-relative
 `/admin/users/...` and `/review/...` hrefs. These omit the installation prefix on
 subfolder deployments. The compact user-list summary already uses `getURL`.
 
@@ -121,7 +121,7 @@ and retain the review reference. Do not claim external evidence for local cases.
 
 ### Medium: review action ignores the core moderation result
 
-`ReviewableSpamGuard#perform_silence_account` returns a successful rejected review
+`ReviewableSpamWarden#perform_silence_account` returns a successful rejected review
 regardless of `Moderation.silence` returning false. Already-silenced or suspended
 accounts take this path, and the action can still be offered when Guardian permits
 silencing. The interface should distinguish confirming an existing restriction
@@ -164,7 +164,7 @@ do not replace batching with per-user serializer queries to remove the prepend.
   reassess outbound-request protections if configurable destinations are added.
 - Core posting validation and rate limits remain authoritative. Historical burst
   and duplicate evidence complement them; do not build a competing posting gate.
-- An exemption applies to Spam Guard only. Preserve core sanctions and other spam
+- An exemption applies to Spam Warden only. Preserve core sanctions and other spam
   systems, including Discourse AI; do not reinterpret it as universal approval.
 - Before implementing Pro analysis, add a tested evidence-contribution contract
   before assessment. The current post-check event occurs after persistence and

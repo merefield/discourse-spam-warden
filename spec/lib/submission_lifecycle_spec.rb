@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::Submission do
+RSpec.describe DiscourseSpamWarden::Submission do
   fab!(:user)
   fab!(:admin)
-  fab!(:post) { Fabricate(:spam_guard_confirmed_post, user: user) }
+  fab!(:post) { Fabricate(:spam_warden_confirmed_post, user: user) }
 
   before do
-    described_class.reserve(DiscourseSpamGuard::SubmissionCandidate.latest(user), admin)
-    SiteSetting.spam_guard_enabled = false
+    described_class.reserve(DiscourseSpamWarden::SubmissionCandidate.latest(user), admin)
+    SiteSetting.spam_warden_enabled = false
   end
 
   describe "account anonymization" do

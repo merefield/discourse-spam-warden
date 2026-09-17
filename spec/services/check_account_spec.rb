@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe DiscourseSpamGuard::CheckAccount do
+RSpec.describe DiscourseSpamWarden::CheckAccount do
   describe described_class::Contract, type: :model do
     it { is_expected.to validate_presence_of(:user_id) }
     it do
@@ -18,7 +18,7 @@ RSpec.describe DiscourseSpamGuard::CheckAccount do
     let(:params) { { user_id: user.id, source: "manual" } }
     let(:dependencies) { { guardian: actor.guardian } }
 
-    before { SiteSetting.spam_guard_enabled = true }
+    before { SiteSetting.spam_warden_enabled = true }
 
     context "with invalid parameters" do
       let(:params) { { user_id: nil } }
@@ -27,7 +27,7 @@ RSpec.describe DiscourseSpamGuard::CheckAccount do
     end
 
     context "when disabled" do
-      before { SiteSetting.spam_guard_enabled = false }
+      before { SiteSetting.spam_warden_enabled = false }
 
       it { is_expected.to fail_a_policy(:enabled) }
     end
@@ -73,7 +73,7 @@ RSpec.describe DiscourseSpamGuard::CheckAccount do
       let(:dependencies) { { guardian: Discourse.system_user.guardian } }
 
       before do
-        SiteSetting.spam_guard_check_ip = false
+        SiteSetting.spam_warden_check_ip = false
         stub_request(:post, "https://api.stopforumspam.org/api").to_return(
           body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json,
         )
@@ -87,7 +87,7 @@ RSpec.describe DiscourseSpamGuard::CheckAccount do
 
     context "when an administrator checks an account" do
       before do
-        SiteSetting.spam_guard_check_ip = false
+        SiteSetting.spam_warden_check_ip = false
         stub_request(:post, "https://api.stopforumspam.org/api").to_return(
           body: { success: 1, email: { appears: 0, frequency: 0 } }.to_json,
         )
