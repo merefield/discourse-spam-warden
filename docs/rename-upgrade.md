@@ -49,3 +49,11 @@ opened again because its signing purpose has changed.
 Rollback requires restoring the pre-upgrade database backup and previous code;
 do not run the old code against renamed tables. Existing uncertain submissions
 remain uncertain and must not be resent merely because of the rename.
+
+## Legacy scheduler failures
+
+Version 0.2.1 fixes legacy scheduled-job handlers that could cause repeated
+`undefined method 'is_per_host'` errors after upgrading to 0.2.0. Update and restart
+all Sidekiq workers. The old cleanup and submission-recovery entries then drain
+once without recurring, while the Warden schedules continue normally. No database
+migration, Redis flush or resubmission of uncertain reports is required.

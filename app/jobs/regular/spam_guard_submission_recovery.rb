@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Jobs
-  # Keep jobs queued before the rename executable after an upgrade.
-  class SpamGuardSubmissionRecovery < ::Jobs::Base
+  # Persisted MiniScheduler entries need the scheduled API, but must not recur.
+  class SpamGuardSubmissionRecovery < ::Jobs::Scheduled
     def execute(args)
       SpamWardenSubmissionRecovery.new.execute(args)
     end
