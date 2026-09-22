@@ -30,7 +30,7 @@ en:
           no_match: "No reported match: no points"
           not_checked: "Identifier not checked: no points"
       ai:
-        title: "Discourse AI findings"
+        title: "AI spam findings"
         description: "Existing automated classifications, shown alongside staff decisions. AI findings add no risk points and never authorize reporting on their own."
         refresh: "Refresh AI findings"
         spam: "AI classification: suspected spam"

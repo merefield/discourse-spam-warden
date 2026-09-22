@@ -108,3 +108,5 @@ Account deletion and anonymization remove the plugin's local records. Removing l
 The features described above are included in the free, GPLv2 plugin. An optional Pro extension is planned for advanced analysis and larger moderation workflows; its additional features are not available yet. Individual confirmed-spam reporting and its safeguards remain free.
 
 **[Support ongoing development on GitHub](https://github.com/sponsors/merefield)**
+
+Classifier extensions can supply existing post assessments to the same admin-only AI findings and review reconciliation. This reporting interface does not run a classifier or add automated risk points. See [classifier integration](classifier-integration.md).

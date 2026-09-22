@@ -175,3 +175,5 @@ remain part of the free plugin.
 
 [Support ongoing development](https://github.com/sponsors/merefield).
 The [Meta introduction](docs/meta-topic.md) is a ready-to-paste plugin topic draft.
+
+Classifier extensions can supply existing post assessments to the same admin-only AI findings and review reconciliation. This reporting interface does not run a classifier or add automated risk points. See [classifier integration](docs/classifier-integration.md).
