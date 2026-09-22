@@ -1,12 +1,12 @@
-# Discourse AI integration
+# AI classifier integration
 
-The free plugin can display existing Discourse AI spam findings alongside Stop Forum
+The free plugin can display existing Discourse AI or extension-provided spam findings alongside Stop Forum
 Spam reputation. It does not run a classifier or make additional LLM requests.
 
 ## Setup and dashboard
 
-`spam_warden_ai_integration` defaults on. It takes effect only when Discourse AI and
-its spam-log table are available. Disable it to stop AI evidence display and review
+`spam_warden_ai_integration` defaults on. It takes effect when Discourse AI or an installed classifier extension provides an
+available log table. Neither Discourse AI nor a paid extension is mandatory. Disable it to stop AI evidence display and review
 coordination. Spam Warden works without Discourse AI installed.
 
 Open an admin user page and expand **Spam Warden**. The AI panel shows classification,
@@ -58,9 +58,9 @@ Nothing is submitted automatically. See [submission safeguards](submissions.md).
 
 AI explanations are admin-only. Raw prompts, model payloads and audit-log contents are
 not returned by Spam Warden. No AI evidence is copied into its tables or sent to Stop
-Forum Spam. AI retains ownership of its logs and their retention policy.
+Forum Spam. Each classifier retains ownership of its logs and retention policy.
 
-The adapter reads `AiSpamLog` and core `ReviewableFlaggedPost` / `ReviewableScore` records.
+The adapter reads `AiSpamLog`, registered [classifier log models](classifier-integration.md), and core `ReviewableFlaggedPost` / `ReviewableScore` records.
 Only positive-ID human staff review decisions count as confirmation. Review-list scan
 and AI associations are fetched in batches. The reconciliation job uses the same account
 mutex as reputation checks and core review transitions for the duplicate's audit history.

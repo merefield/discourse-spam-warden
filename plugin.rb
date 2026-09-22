@@ -2,7 +2,7 @@
 
 # name: discourse-spam-warden
 # about: Explainable Stop Forum Spam reputation checks and moderation tools.
-# version: 0.2.1
+# version: 0.2.2
 # authors: Robert Barrow
 # url: https://github.com/merefield/discourse-spam-warden
 
@@ -21,6 +21,7 @@ add_admin_route "spam_warden.title", "discourse-spam-warden", use_new_show_route
 module ::DiscourseSpamWarden
   PLUGIN_NAME = "discourse-spam-warden"
   EXTENSION_API_VERSION = 1
+  CLASSIFIER_API_VERSION = 1
 
   def self.enabled?
     SiteSetting.spam_warden_enabled

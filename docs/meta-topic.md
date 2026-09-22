@@ -71,12 +71,12 @@ Install the plugin using the guide above, then open **Admin → Plugins → Spam
 
 Saved assessments retain their original scores and settings. Older records show a legacy breakdown; recheck an account to apply the new formula. Report counts are cumulative, and the latest report date does not date every report.
 
-### Discourse AI integration
+### AI classifier integration
 
 Included free: saved AI classifications, explanations, scan times, post/review links
 and separate human review outcomes on the admin account dashboard. Spam Warden reuses
 pending AI reviews and consolidates duplicate account reviews in a background job.
-`spam_warden_ai_integration` defaults on when Discourse AI is installed; AI is optional.
+`spam_warden_ai_integration` defaults on and works with Discourse AI or a registered classifier extension; both are optional.
 
 AI classifications add no risk points and cannot authorize reports. Human-confirmed
 AI flags use the existing confirmed-spam rule and can lead to the existing account
@@ -108,3 +108,5 @@ Account deletion and anonymization remove the plugin's local records. Removing l
 The features described above are included in the free, GPLv2 plugin. An optional Pro extension is planned for advanced analysis and larger moderation workflows; its additional features are not available yet. Individual confirmed-spam reporting and its safeguards remain free.
 
 **[Support ongoing development on GitHub](https://github.com/sponsors/merefield)**
+
+Classifier extensions can supply existing post assessments to the same admin-only AI findings and review reconciliation. This reporting interface does not run a classifier or add automated risk points. See [classifier integration](classifier-integration.md).
