@@ -10,12 +10,36 @@ module DiscourseSpamWarden
       SiteSetting.spam_warden_ai_integration && log_models.present?
     end
 
+    def self.extension_values(name, defaults)
+      values =
+        ActiveRecord::Base.transaction(requires_new: true) do
+          DiscoursePluginRegistry.apply_modifier(name, defaults.dup)
+        end
+      raise TypeError unless values.is_a?(Array)
+      values
+    rescue StandardError => error
+      Rails.logger.warn("Spam Warden classifier modifier #{name} unavailable (#{error.class})")
+      defaults
+    end
+
+    def self.provider_result(model, fallback: [])
+      # A provider SQL failure must not abort an enclosing account-check transaction.
+      result = ActiveRecord::Base.transaction(requires_new: true) { yield }
+      result.nil? ? fallback : result
+    rescue StandardError => error
+      Rails.logger.warn(
+        "Spam Warden classifier provider #{model.name} unavailable (#{error.class})",
+      )
+      fallback
+    end
+
     def self.log_models
       models = defined?(::AiSpamLog) ? [::AiSpamLog] : []
-      DiscoursePluginRegistry
-        .apply_modifier(:spam_warden_classifier_log_models, models)
-        .uniq
-        .select(&:table_exists?)
+      extension_values(:spam_warden_classifier_log_models, models).uniq.select do |model|
+        provider_result(model, fallback: false) do
+          model.is_a?(Class) && model < ActiveRecord::Base && model.table_exists?
+        end
+      end
     end
 
     def self.posts(user)
@@ -46,9 +70,12 @@ module DiscourseSpamWarden
       return nil unless guardian.is_admin? && available?
       logs =
         log_models
-          .flat_map { |model| latest_logs(user, model).limit(RESULT_LIMIT).to_a }
+          .flat_map do |model|
+            provider_result(model) { latest_logs(user, model).limit(RESULT_LIMIT).to_a }
+          end
           .sort_by { |log| [log.created_at, log.id] }
           .reverse
+          .uniq(&:post_id)
           .take(RESULT_LIMIT)
       post_by_id =
         posts(user)
@@ -117,7 +144,9 @@ module DiscourseSpamWarden
       review_ids =
         log_models
           .flat_map do |model|
-            latest_logs(user, model).where(is_spam: true, error: [nil, ""]).pluck(:reviewable_id)
+            provider_result(model) do
+              latest_logs(user, model).where(is_spam: true, error: [nil, ""]).pluck(:reviewable_id)
+            end
           end
           .compact
           .uniq
@@ -134,14 +163,16 @@ module DiscourseSpamWarden
       return [] unless available? && reviews.present?
       log_models
         .flat_map do |model|
-          model
-            .where(
-              post_id: reviews.map(&:target_id),
-              reviewable_id: reviews.map(&:id),
-              is_spam: true,
-            )
-            .distinct
-            .pluck(:reviewable_id)
+          provider_result(model) do
+            model
+              .where(
+                post_id: reviews.map(&:target_id),
+                reviewable_id: reviews.map(&:id),
+                is_spam: true,
+              )
+              .distinct
+              .pluck(:reviewable_id)
+          end
         end
         .uniq
     end
@@ -157,9 +188,8 @@ module DiscourseSpamWarden
           end
         )
       bot_ids =
-        DiscoursePluginRegistry
-          .apply_modifier(:spam_warden_classifier_bot_ids, bot_ids)
-          .select(&:negative?)
+        extension_values(:spam_warden_classifier_bot_ids, bot_ids)
+          .select { |id| id.is_a?(Integer) && id.negative? }
           .uniq
       return if bot_ids.empty?
       unless review

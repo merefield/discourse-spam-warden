@@ -96,11 +96,11 @@ See [external scoring and upgrade details](docs/external-scoring.md),
 [reading activity](docs/engagement-assessment.md), [local signals](docs/local-signals.md)
 and [status design](docs/status-design.md).
 
-## Discourse AI integration
+## AI classifier integration
 
 The free plugin optionally shows saved AI spam findings, human review outcomes and
 post/review links on the account dashboard. It reuses pending AI reviews and consolidates
-duplicate account reviews. `spam_warden_ai_integration` defaults on when AI is installed.
+duplicate account reviews. `spam_warden_ai_integration` defaults on and works with Discourse AI or a registered classifier extension.
 AI classifications add no risk points; human-confirmed spam uses the existing rule.
 Confirmed findings link to the existing, explicitly approved account reporting preview.
 No additional LLM calls are made. See [AI integration](docs/ai-integration.md).

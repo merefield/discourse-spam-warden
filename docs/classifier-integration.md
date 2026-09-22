@@ -14,8 +14,16 @@ history and staff decisions remain visible.
 
 The same admin-only snapshot, public-topic scope, 30-day/100-post sample, ten-result
 limit, human decision checks and pending-review reconciliation apply to every
-provider. Queries bound each provider independently before merging results. Automated
-classifications do not add risk points or authorize external submissions.
+provider. Queries bound each provider independently before merging results, select
+only the newest finding per post across providers, and then apply the global limit.
+Pending reviews remain eligible for reuse independently of the display winner.
+
+Callback failures or malformed callback results are logged without exception messages
+and fall back to the built-in provider/bot IDs. Pass-through defaults are copied before
+calling extensions. Unavailable tables and failing provider queries are isolated per
+model, so other providers remain usable. SQL reads use savepoints so a failing provider
+does not abort an enclosing account-check transaction. Bot IDs must be negative integers.
+Automated classifications do not add risk points or authorize external submissions.
 
 Retain the provider adapter while its historical logs are needed. Removing an
 extension hides its additional findings but leaves core review records intact.
