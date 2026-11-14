@@ -111,3 +111,15 @@ plugins:
     default: 30
     min: 0
     max: 100
+  spam_warden_shared_ip_points:
+    default: 15
+    min: 0
+    max: 100
+  spam_warden_shared_ip_suspicion_threshold:
+    default: 30
+    min: 1
+    max: 100
+  spam_warden_shared_ip_days:
+    default: 30
+    min: 1
+    max: 365

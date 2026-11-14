@@ -12,6 +12,7 @@ import dIcon from "discourse/ui-kit/helpers/d-icon";
 import { i18n } from "discourse-i18n";
 import SpamWardenAiEvidence from "./spam-warden-ai-evidence";
 import SpamWardenEvidence from "./spam-warden-evidence";
+import SpamWardenRelatedAccounts from "./spam-warden-related-accounts";
 import SpamWardenSubmission from "./spam-warden-submission";
 
 export default class SpamWardenUser extends Component {
@@ -209,6 +210,11 @@ export default class SpamWardenUser extends Component {
                 @scan={{this.state.scan}}
                 @exempt={{this.state.allowed}}
               >
+                <SpamWardenRelatedAccounts
+                  @userId={{@user.id}}
+                  @scanId={{this.state.scan.id}}
+                  @exempt={{this.state.allowed}}
+                />
                 <SpamWardenAiEvidence
                   @evidence={{this.state.ai_evidence}}
                   @canReport={{this.canManage}}

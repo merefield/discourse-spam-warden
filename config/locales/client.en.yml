@@ -1,14 +1,42 @@
 en:
   js:
     spam_warden:
+      related:
+        title: "Related accounts"
+        refresh: "Refresh connections"
+        failed: "Connections could not be loaded. Try refreshing."
+        summary: "%{count} related accounts within %{days} days. Independent-suspicion threshold: %{threshold}."
+        live_help: "Connections are live; saved risk points reflect the last check. Independent scores exclude shared-IP points and external IP reputation. Matching addresses do not prove common ownership. Staff and exempt accounts are excluded."
+        own_qualifies: "This account independently scores %{score} and qualifies any matching IP group. The same adjustment applies to it and its peers, once per account."
+        disabled: "Shared-IP scoring is disabled. Connections are shown for context only."
+        excluded: "This account is excluded from shared-IP scoring."
+        saved: "Saved shared-IP factor: %{points} points (subject to the local cap). Checked:"
+        account: "Account"
+        score: "Independent score / 100"
+        connections: "IP connections and evidence dates"
+        qualifies: "Meets independent-suspicion threshold"
+        unassessed: "N/A"
+        show_connections: "View connection evidence (%{count})"
+        connection: "%{source} ↔ %{peer_source}"
+        this_account: "This account’s evidence date:"
+        other_account: "Related account’s evidence date:"
+        empty: "No matching accounts in the selected lookback."
+        more: "Show more accounts"
+        date_help: "Registration dates are exact. Latest-access dates reflect account activity, not a verified observation of that IP. Retained-history dates record address updates, not every access. IP history depends on core retention settings."
+        sources:
+          registration: "Registration"
+          latest_access: "Latest access address"
+          retained_history: "Retained access history"
       calculation:
+        shared_ip: "Shared IP with suspicious accounts"
+        shared_ip_detail: "%{related} related accounts; %{suspicious} independently suspicious accounts in matching groups (including this account when it qualifies). Lookback: %{days} days; independent threshold: %{threshold}."
         how: "How scoring works"
-        summary: "Email reports contributed %{email} points and IP reports %{ip}. Activity and reading adjusted suspicion by %{adjustment} points."
+        summary: "Email reports contributed %{email} points and IP reports %{ip}. Local signals and reading adjusted suspicion by %{adjustment} points."
         confirmed_summary: "Suspicion after activity and reading contributed %{suspicion} points. Staff-confirmed spam added %{confirmed} points."
         legacy_summary: "Saved assessment using the previous scoring method. Recheck to apply the current formula."
         posting: "Posting signals"
         posting_formula: "min(%{duplicate} duplicate points + %{burst} burst points, cap %{cap})"
-        local_cap: "Posting and extension subtotal (cap %{cap})"
+        local_cap: "Local signals subtotal (cap %{cap})"
         suspicion: "Suspicion subtotal (minimum 0)"
         confirmed: "Staff-confirmed spam"
         confirmed_formula:
@@ -113,6 +141,7 @@ en:
         checked: "Checked"
         source: "Check type"
         sources:
+          shared_ip: "Shared-IP refresh"
           registration: "Registration"
           recheck: "Follow-up check"
           manual: "Manual check"

@@ -50,6 +50,15 @@ module DiscourseSpamWarden
              }
     end
 
+    def related_accounts
+      render json:
+               SharedIpPresentation.call(
+                 User.find(params[:user_id]),
+                 guardian: guardian,
+                 after_id: [params[:after_id].to_i, 0].max,
+               )
+    end
+
     def update_exception
       UpdateException.call(**service_params) do
         on_success { head :no_content }

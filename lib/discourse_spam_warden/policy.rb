@@ -31,7 +31,7 @@ module DiscourseSpamWarden
 
     def self.settings
       {
-        "version" => 8,
+        "version" => 9,
         "weights" => weights,
         "external_weights" => external_weights,
         "preset" => SiteSetting.spam_warden_preset,
@@ -50,7 +50,8 @@ module DiscourseSpamWarden
       engagement:,
       status:,
       local_signals: nil,
-      additional_evidence: []
+      additional_evidence: [],
+      shared_ip: nil
     )
       external = status == "checked" ? evaluate(evidence, settings) : "unknown"
       external_scoring = score_external(evidence, settings) if status == "checked"
@@ -67,7 +68,8 @@ module DiscourseSpamWarden
         AdditionalEvidence::MAX_POINTS,
         [local_cap - posting_points, 0].max,
       ].min
-      local_points = posting_points + additional_points
+      shared_ip_points = shared_ip&.fetch("points", 0) || 0
+      local_points = posting_points + additional_points + shared_ip_points
       capped_local = [local_points, local_cap].min
       if base
         suspicion = [0, base + capped_local + reading].max
@@ -77,6 +79,7 @@ module DiscourseSpamWarden
           "posting" => posting_points,
           "posting_cap" => LocalSignals::POSTING_CAP,
           "additional" => additional_points,
+          "shared_ip" => shared_ip_points,
           "local_cap" => local_cap,
           "capped_local" => capped_local,
           "reading" => reading,
@@ -109,6 +112,7 @@ module DiscourseSpamWarden
         "engagement" => engagement,
         "local_signals" => local_signals,
         "additional_evidence" => additional_evidence,
+        "shared_ip" => shared_ip,
         "additional_points" => additional_points,
       }
     end

@@ -10,6 +10,20 @@ import SpamWardenAiReview from "discourse/plugins/discourse-spam-warden/discours
 
 module("Integration | Component | SpamWardenAiEvidence", function (hooks) {
   setupRenderingTest(hooks);
+  hooks.beforeEach(() => {
+    pretender.get(
+      "/admin/plugins/discourse-spam-warden/accounts/:user_id/related.json",
+      () =>
+        response({
+          accounts: [],
+          total: 0,
+          days: 30,
+          threshold: 30,
+          enabled: true,
+          eligible: true,
+        })
+    );
+  });
 
   test("AI review links request the expanded account dashboard", async function (assert) {
     this.currentUser.set("admin", true);

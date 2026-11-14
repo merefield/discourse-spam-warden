@@ -475,3 +475,16 @@
     font-size: var(--font-up-1);
   }
 }
+
+.spam-warden-related {
+  min-width: 0;
+
+  .d-table__cell {
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  details li {
+    margin-block-end: 0.5em;
+  }
+}

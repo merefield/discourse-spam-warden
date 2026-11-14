@@ -35,7 +35,9 @@ export default class SpamWardenCalculation extends Component {
   get localCapped() {
     return (
       this.calculation.capped_local <
-      this.calculation.posting + this.calculation.additional
+      this.calculation.posting +
+        this.calculation.additional +
+        (this.calculation.shared_ip || 0)
     );
   }
 
@@ -84,6 +86,17 @@ export default class SpamWardenCalculation extends Component {
                   }}</dt><dd>{{signed
                     this.calculation.additional
                   }}</dd></div>{{/if}}
+            {{#if this.calculation.shared_ip}}
+              <div><dt>{{i18n "spam_warden.calculation.shared_ip"}}
+                  <span class="spam-warden-calculation__formula">{{i18n
+                      "spam_warden.calculation.shared_ip_detail"
+                      related=this.assessment.shared_ip.related_accounts
+                      suspicious=this.assessment.shared_ip.suspicious_accounts
+                      days=this.assessment.shared_ip.days
+                      threshold=this.assessment.shared_ip.threshold
+                    }}</span>
+                </dt><dd>{{signed this.calculation.shared_ip}}</dd></div>
+            {{/if}}
             {{#if this.localCapped}}<div><dt>{{i18n
                     "spam_warden.calculation.local_cap"
                     cap=this.calculation.local_cap

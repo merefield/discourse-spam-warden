@@ -7,7 +7,7 @@ module DiscourseSpamWarden
         return if !DiscourseSpamWarden.enabled? || !user.human? || user.staff?
         return if Account.exists?(user: user, allowed: true)
         return if source == "activity" && !SiteSetting.spam_warden_local_signals
-        if source != "manual"
+        if !%w[manual shared_ip].include?(source)
           previous = Scan.where(user: user, source: source).latest.first
           if source == "activity"
             return previous if previous && previous.created_at > 1.minute.ago
@@ -23,13 +23,17 @@ module DiscourseSpamWarden
         engagement = Engagement.snapshot(user, source: source, weights: weights)
         local_signals = LocalSignals.snapshot(user, weights: weights)
         additional_evidence = AdditionalEvidence.collect(user_id: user.id, source: source)
+        previous_assessment = Scan.where(user: user).latest.first&.policy&.dig("assessment")
         scan = nil
         user.with_lock do
           if !DiscourseSpamWarden.enabled? || !user.human? || user.staff? ||
                Account.exists?(user: user, allowed: true)
             return
           end
-          return if source != "manual" && (user.created_at < 7.days.ago || user.trust_level > 1)
+          if !%w[manual shared_ip].include?(source) &&
+               (user.created_at < 7.days.ago || user.trust_level > 1)
+            return
+          end
           return if source == "activity" && !SiteSetting.spam_warden_local_signals
           return if fields != Client.identifiers(user)
           local_signals = {
@@ -45,6 +49,16 @@ module DiscourseSpamWarden
             status: result["status"],
             local_signals: local_signals,
             additional_evidence: additional_evidence,
+          )
+          shared_ip = SharedIp.snapshot(user, settings["assessment"])
+          settings["assessment"] = Policy.assess(
+            result["evidence"],
+            settings,
+            engagement: engagement,
+            status: result["status"],
+            local_signals: local_signals,
+            additional_evidence: additional_evidence,
+            shared_ip: shared_ip,
           )
           decision = settings["assessment"]["decision"]
           scan =
@@ -81,12 +95,22 @@ module DiscourseSpamWarden
             end
             scan.update!(reviewable: reviewable, action_taken: "review")
             if SiteSetting.spam_warden_mode == "protect" && decision == "silence" &&
-                 source != "manual" && !user.silenced? && !user.suspended?
+                 !%w[manual shared_ip].include?(source) && !user.silenced? && !user.suspended?
               if Moderation.silence(user, Discourse.system_user, reviewable: reviewable)
                 scan.update!(action_taken: "silenced")
               end
             end
           end
+        end
+        assessment = scan.policy["assessment"]
+        group_changed =
+          SharedIp.independent_score(previous_assessment) != SharedIp.independent_score(assessment)
+        if (source != "shared_ip" || group_changed) &&
+             (
+               assessment.dig("shared_ip", "points").to_i.positive? ||
+                 previous_assessment&.dig("shared_ip", "points").to_i.positive?
+             )
+          SharedIp.enqueue(user)
         end
         DiscourseEvent.trigger(:spam_warden_checked, scan)
         scan

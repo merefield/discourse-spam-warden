@@ -22,6 +22,30 @@ RSpec.describe DiscourseSpamWarden::Checker do
       )
     end
 
+    it "refreshes both members of a shared-IP group without reinforcing or silencing" do
+      user.update!(ip_address: "203.0.113.40", registration_ip_address: "203.0.113.40")
+      peer =
+        Fabricate(
+          :user,
+          ip_address: user.ip_address,
+          registration_ip_address: user.ip_address,
+          created_at: 8.days.ago,
+        )
+      SiteSetting.spam_warden_mode = "protect"
+      original = described_class.call(user, source: "manual")
+      expect(original.policy.dig("assessment", "calculation", "shared_ip")).to eq(15)
+      Jobs::SpamWardenSharedIpRefresh.new.execute(user_id: user.id)
+      linked = DiscourseSpamWarden::Scan.where(user: peer).latest.first
+      expect(linked.source).to eq("shared_ip")
+      expect(linked.policy.dig("assessment", "calculation", "shared_ip")).to eq(15)
+      repeated = described_class.call(peer, source: "shared_ip")
+      expect(repeated.policy.dig("assessment", "score")).to eq(
+        linked.policy.dig("assessment", "score"),
+      )
+      expect(peer.reload).not_to be_silenced
+      expect(user.reload).not_to be_silenced
+    end
+
     it "records evidence without restrictions in observe mode" do
       scan = described_class.call(user, source: "registration")
 
