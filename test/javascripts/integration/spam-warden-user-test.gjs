@@ -7,6 +7,20 @@ import SpamWardenUser from "discourse/plugins/discourse-spam-warden/discourse/co
 
 module("Integration | Component | SpamWardenUser", function (hooks) {
   setupRenderingTest(hooks);
+  hooks.beforeEach(() => {
+    pretender.get(
+      "/admin/plugins/discourse-spam-warden/accounts/:user_id/related.json",
+      () =>
+        response({
+          accounts: [],
+          total: 0,
+          days: 30,
+          threshold: 30,
+          enabled: true,
+          eligible: true,
+        })
+    );
+  });
 
   test("an exemption updates the dashboard and removing it restores the assessment", async function (assert) {
     this.currentUser.set("admin", true);

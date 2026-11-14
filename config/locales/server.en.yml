@@ -1,5 +1,8 @@
 en:
   site_settings:
+    spam_warden_shared_ip_points: "Points added once to each account sharing an IP with an independently suspicious account, including the suspicious account itself. Subject to the local-points cap. Set to 0 to disable. Requires local signals. Shared IPs alone never authorize silence."
+    spam_warden_shared_ip_suspicion_threshold: "Minimum independent score to qualify a shared-IP group. Excludes shared-IP points and Stop Forum Spam IP points, preventing circular reinforcement and duplicate IP evidence. Exempt and staff accounts are excluded."
+    spam_warden_shared_ip_days: "Lookback for registration, latest access, retained IP history and qualifying assessments. Discourse retains only limited IP history; this is not a complete access log."
     spam_warden_email_report_points: "Points per cumulative email report before its cap and recency adjustment. Display scoring only; does not change moderation thresholds."
     spam_warden_email_points_cap: "Maximum email points before recency adjustment. Reports last seen within 7 days receive full weight, within 30 days half, and older or undated matches zero."
     spam_warden_ip_report_points: "Points per cumulative registration IP report before its cap and recency adjustment. Display scoring only; does not change moderation thresholds."

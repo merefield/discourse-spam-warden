@@ -56,9 +56,6 @@ Checks are asynchronous, so they cannot guarantee preventing a first spam post. 
 
 ### Settings and getting started
 
-Upgrading from Spam Guard requires a maintenance window and the renamed
-`discourse-spam-warden` install directory. See the [upgrade instructions](https://github.com/merefield/discourse-spam-warden/blob/main/docs/rename-upgrade.md) before updating.
-
 Install the plugin using the guide above, then open **Admin → Plugins → Spam Warden**.
 
 * Enable `spam_warden_enabled` to start reputation checks. It defaults off; start with `spam_warden_mode` set to `observe` and review the results before enabling enforcement.

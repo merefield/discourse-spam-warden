@@ -1,4 +1,4 @@
-# Upgrade from Spam Guard to Spam Warden
+# Upgrading to version 0.2.0
 
 Version 0.2.0 renames the plugin, Ruby namespace, routes, JavaScript modules,
 settings, CSS classes, extension events and database tables to Spam Warden.
@@ -28,7 +28,7 @@ The post-deployment migration renames the accounts, scans and submissions tables
 and their indexes without copying or dropping records. Account exemptions,
 plugin-owned silence history, saved scores, review associations and submission
 history retain their IDs. Existing setting overrides, including the submission
-API key, move from `spam_guard_*` to `spam_warden_*`. Conflicting setting names
+API key, move to the `spam_warden_*` setting names. Conflicting setting names
 cause the transaction to fail rather than overwrite a value.
 
 Reviewable types and sources, review reasons and structured staff action names

@@ -2,7 +2,7 @@
 
 # name: discourse-spam-warden
 # about: Explainable Stop Forum Spam reputation checks and moderation tools.
-# version: 0.2.2
+# version: 0.2.3
 # authors: Robert Barrow
 # url: https://github.com/merefield/discourse-spam-warden
 

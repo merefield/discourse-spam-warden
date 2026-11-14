@@ -44,7 +44,6 @@ reputation matches and lack of reading are signals, not proof of spam.
 
 ## Installation and setup
 
-**Upgrading from Spam Guard?** Follow the [rename upgrade instructions](docs/rename-upgrade.md).
 This release requires a maintenance window, post-deployment migrations and the
 `discourse-spam-warden` plugin directory. The GitHub repository is now `merefield/discourse-spam-warden`.
 
@@ -177,3 +176,31 @@ remain part of the free plugin.
 The [Meta introduction](docs/meta-topic.md) is a ready-to-paste plugin topic draft.
 
 Classifier extensions can supply existing post assessments to the same admin-only AI findings and review reconciliation. This reporting interface does not run a classifier or add automated risk points. See [classifier integration](docs/classifier-integration.md).
+
+### Shared-IP account groups
+
+A shared registration or access IP adds 15 points once to every non-exempt,
+non-staff account in that direct IP group when any member independently scores
+at least 30. The suspicious member receives the same adjustment. Independent
+scores exclude both this adjustment and Stop Forum Spam IP points: related
+accounts cannot recursively make each other suspicious. The contribution shares
+the local-signals cap and never authorizes automatic silence.
+
+`spam_warden_shared_ip_points` controls the contribution (0 disables it),
+`spam_warden_shared_ip_suspicion_threshold` controls qualification, and
+`spam_warden_shared_ip_days` defaults to 30. Matches use recent registrations,
+latest observed access, and Discourse's retained IP history; that history is
+limited, not a complete access log. Only the newest recent assessment qualifies
+an account. Staff and explicitly allowed accounts neither qualify nor receive
+this factor. Ordinary checks queue batched background refreshes of direct peers,
+including older accounts. Existing accounts are evaluated as checks run; installing
+this feature does not immediately scan the entire user table. Shared-IP refreshes
+use the normal cached reputation lookup and cannot automatically silence users.
+The score snapshot stores counts and settings, not raw IPs. The admin-only
+Related accounts card reads current connections from core records on demand,
+with paginated account links, independent scores, connection types and expandable
+IP/date evidence. Live relationships are explicitly separate from saved score
+points. Registration, latest-address and retained-history dates are labelled;
+latest-address timestamps are account activity, not a verified IP observation.
+Refresh connections never performs an external lookup. Staff and exempt accounts
+are excluded from the list. No browser fingerprint or session token is stored.
